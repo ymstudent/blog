@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="zh-cn" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="author" content="VarKai" />
+	
+	
+	
+	<title>redis数据结构之简单动态字符串 ｜ 云起</title>
+	
+    
+    
+    <meta name="description" content="简单动态字符串（Simple Dynamic String）: 简称SDS, 是redis默认的字符串表示，除了用来保存数据库中的字符串值外，还被用作缓冲区（buffer），eg: AOF缓冲区，客户端的输入缓冲区 SDS的" />
+    
+
+    
+    
+    <meta name="keywords" content="redis, SDS, 设计与实现" />
+    
+
+	
+    
+    <link rel="shortcut icon" href="http://example.org/images/favicon.ico" />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="http://example.org/css/normalize.css" />
+    <link rel="stylesheet" type="text/css" media="screen" href="https://cdn.jsdelivr.net/npm/animate.css@4.1.0/animate.min.css" />
+    <link rel="stylesheet" type="text/css" media="screen" href="http://example.org/css/zozo.css" />
+	<link rel="stylesheet" type="text/css" media="screen" href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css" />
+    <link rel="stylesheet" type="text/css" media="screen" href="http://example.org/css/highlight.css" />
+
+    
+    
+</head>
+
+<body>
+    <div class="main animate__animated animate__fadeInDown">
+        <div class="nav_container animated fadeInDown">
+    <div class="site_nav" id="site_nav">
+        <ul>
+            
+            <li>
+                <a href="/">Home</a>
+            </li>
+            
+            <li>
+                <a href="/posts/">Archive</a>
+            </li>
+            
+            <li>
+                <a href="/tags/">Tags</a>
+            </li>
+            
+            <li>
+                <a href="/about/">About</a>
+            </li>
+            
+        </ul>
+    </div>
+    <div class="menu_icon">
+        <a id="menu_icon"><i class="ri-menu-line"></i></a>
+    </div>
+</div>
+        <div class="header animated fadeInDown">
+    <div class="site_title_container">
+        <div class="site_title">
+            <h1>
+                <a href="http://example.org/">
+                    <span>云起</span>
+                </a>
+            </h1>
+        </div>
+        <div class="description">
+            <p class="sub_title">道阻且长，行则将至</p>
+            <div class="my_socials">
+                
+                
+                <a href="https://github.com/ymstudent" title="github" target="_blank"><i class="ri-github-fill"></i></a>
+                
+                
+                <a href="http://example.org/index.xml" type="application/rss+xml" title="rss" target="_blank"><i
+                        class="ri-rss-fill"></i></a>
+            </div>
+        </div>
+    </div>
+</div>
+        <div class="content">
+            <div class="post_page">
+                <div class="post animate__animated animate__fadeInDown">
+                    <div class="post_title post_detail_title">
+                        <h2><a href='/posts/redis/sds_struct/'>redis数据结构之简单动态字符串</a></h2>
+                        <span class="date">2020.12.12</span>
+                    </div>
+                    <div class="post_content markdown"><p>简单动态字符串（Simple Dynamic String）: 简称SDS, 是redis默认的字符串表示，除了用来保存数据库中的字符串值外，还被用作缓冲区（buffer），eg: AOF缓冲区，客户端的输入缓冲区</p>
+<h3 id="sds的结构">SDS的结构</h3>
+<pre><code>struct sdshdr {
+​	//记录buf数组中已使用字节的数量，等于SDS所保存的字符串的长度
+​	int len ;
+​	//记录buf数组中未使用字节的数量
+​	int free ;
+​	//字节数组，用于保存字符串
+​	char buf[] ;
+}
+</code></pre><h3 id="sds结构相较于c字符串的优点">SDS结构相较于C字符串的优点</h3>
+<p>相比于C语言使用的字符串，SDS结构在安全性、效率以及功能方面都要更胜一筹。</p>
+<h4 id="-常数复杂度获取字符串长度">* 常数复杂度获取字符串长度</h4>
+<p>C字符串并不记录自身的长度信息，所以想要获取一个C字符串的长度，程序必须遍历整个字符串，这个操作的复杂度为O(N)。</p>
+<p>而SDS字符串在len属性中记录了自身的长度，所以获取一个SDS长度的复杂度为O(1)。</p>
+<h4 id="-杜绝缓冲区溢出">* 杜绝缓冲区溢出</h4>
+<p>C字符串在修改字符串内容时，需要手动对为字符串分配足够的内存，否则很容易发生缓冲区溢出（buff overflow）。而SDS结构完全杜绝了这种情况的发生：当SDS API对SDS进行修改时，API会首先检查SDS的free属性，看剩余空间否能满足修改所需要求，如果不满足API会自动将SDS的空间扩展至所需大小，然后再进行实际的修改操作</p>
+<h4 id="-减少修改字符串带来的内存重分配次数">* 减少修改字符串带来的内存重分配次数</h4>
+<p>因为C字符串并未记录自身的长度，所以对于一个包含了N个字符的C字符串来说，其底层实现总是一个N+1字符长的数组。这导致每次增加或缩短一个C字符，程序总要对保存这个C字符的数组进行一次内存重分配操作：</p>
+<ul>
+<li>
+<p>对于增加字符串操作，在执行操作前，需要通过内存重分配来扩展底层数组的空间大小，否则很容易产生缓冲区溢出</p>
+</li>
+<li>
+<p>对于缩短字符串操作，在执行操作后，需要通过内存重分配来释放字符串不再使用的那部分空间，否则很容易内存泄露</p>
+</li>
+</ul>
+<p>SDS通过未使用空间解除了字符串长度与底层数组间的关联，并通过空间预分配与惰性空间释放两种优化策略降低内存重分配次数。</p>
+<ul>
+<li>
+<p>空间预分配：对于增加字符串长度的操作，API会先检查SDS的未使用空间是否足够，如果不够程序不仅会为SDS分配修改所必须的空间，还会为SDS分配额外的未使用空间。通过预分配策略，SDS将连续增长N次字符串所需的内存分配次数从必定N次降低为最多N次。</p>
+<ul>
+<li>
+<p>如果修改后SDS的len属性将小于1MB，那么程序将会分配和len属性同样大小的未使用空间</p>
+</li>
+<li>
+<p>如果修改后SDS的len属性大于等于1MB，那么程序会分配1MB的未使用空间</p>
+</li>
+</ul>
+</li>
+<li>
+<p>惰性空间释放：对于缩短字符串的操作，程序并不使用内存重分配来回收缩短后多余的字节，而是通过free属性记录起来，并等待将来使用。当用户需要真正释放掉未使用空间时，可以调用sdsRemoveFreeSpace函数。</p>
+</li>
+</ul>
+<h4 id="-二进制安全">* 二进制安全</h4>
+<p>为了确保Redis可以适用于各种不同的使用场景，SDS的API都是二进制安全的（binary-safe），所有SDS API都会以处理二进制的方式来处理SDS存放在buf数组里的数据，<strong>程序不会对其中的数据做任何限制、过滤、或者假设，数据在写入时是什么样的，它被读取时就是什么样</strong>。</p>
+<p>这也是我们将SDS的buf属性称为字节数组的原因——Redis不是用这个数组来保存字符，而是用它来保存一系列二进制数据。</p>
+<p>通过使用二进制安全的SDS，而不是C字符串，使得Redis不仅可以保存文本数据，还可以保存任意格式的二进制数据。</p>
+<h4 id="-兼容部分c字符串函数">* 兼容部分C字符串函数</h4>
+<p>因为SDS和C字符串一样使用空字符 ( &lsquo;\0&rsquo; ) 结尾，所以可以使用一部分C字符串函数，eg: strcasecmp函数和strcat</p>
+</div>
+                    <div class="post_footer">
+                        
+                        <div class="meta">
+                            <div class="info">
+                                <span class="field tags">
+                                    <i class="ri-stack-line"></i>
+                                    
+                                    <a href="http://example.org/tags/redis/">redis</a>
+                                    
+                                </span>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+                
+                
+                <div class="doc_comments"></div>
+                
+            </div>
+        </div>
+    </div>
+    <a id="back_to_top" href="#" class="back_to_top"><i class="ri-arrow-up-s-line"></i></a>
+    <footer class="footer">
+    <div class="powered_by">
+        <span>@2020 云起 Powered by hugo Theme by zozo</span>
+    </div>
+
+    <div class="footer_slogan">
+    </div>
+</footer>
+    <script src="http://example.org/js/jquery-3.5.1.min.js"></script>
+<link href="http://example.org/css/fancybox.min.css" rel="stylesheet">
+<script src="http://example.org/js/fancybox.min.js"></script>
+<script src="http://example.org/js/zozo.js"></script>
+
+
+<script type="text/javascript" async
+    src="https://cdn.bootcss.com/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        MathJax.Hub.Config({
+            tex2jax: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\[\[', '\]\]']],
+                processEscapes: true,
+                processEnvironments: true,
+                skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+                TeX: {
+                    equationNumbers: { autoNumber: "AMS" },
+                    extensions: ["AMSmath.js", "AMSsymbols.js"]
+                }
+            }
+        });
+
+        MathJax.Hub.Queue(function () {
+            
+            
+            
+            var all = MathJax.Hub.getAllJax(), i;
+            for (i = 0; i < all.length; i += 1) {
+                all[i].SourceElement().parentNode.className += ' has-jax';
+            }
+        });
+    </script>
+
+<style>
+    code.has-jax {
+        font: inherit;
+        font-size: 100%;
+        background: inherit;
+        border: inherit;
+        color: #515151;
+    }
+</style>
+
+
+
+</body>
+
+</html>
