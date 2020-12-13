@@ -6,7 +6,16 @@
     <description>Recent content in redis on 云起</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-cn</language>
-    <lastBuildDate>Sat, 12 Dec 2020 22:43:39 +0800</lastBuildDate><atom:link href="https://ymfeb.cn/tags/redis/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sun, 13 Dec 2020 13:01:53 +0800</lastBuildDate><atom:link href="https://ymfeb.cn/tags/redis/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>redis数据结构之链表</title>
+      <link>https://ymfeb.cn/posts/redis/linkedlist/</link>
+      <pubDate>Sun, 13 Dec 2020 13:01:53 +0800</pubDate>
+      
+      <guid>https://ymfeb.cn/posts/redis/linkedlist/</guid>
+      <description>链表被广泛用于实现redis的各种功能，如：列表键，发布与订阅，慢查询，监视器等 Redis链表的结构 //单节点 typedef struct listNode { //前置节点 struct listNode * prev ; //后置节点 struct listNode * next ; //节点值 void * value ; } listNode ; //redis</description>
+    </item>
+    
     <item>
       <title>redis数据结构之简单动态字符串</title>
       <link>https://ymfeb.cn/posts/redis/sds_struct/</link>

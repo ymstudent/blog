@@ -8,16 +8,19 @@
 	
 	
 	
-	<title>Posts ｜ 云起</title>
+	<title>redis数据结构之链表 ｜ 云起</title>
 	
     
     
+    <meta name="description" content="链表被广泛用于实现redis的各种功能，如：列表键，发布与订阅，慢查询，监视器等 Redis链表的结构 //单节点 typedef struct listNode { //前置节点 struct listNode * prev ; //后置节点 struct listNode * next ; //节点值 void * value ; } listNode ; //redis" />
+    
 
+    
+    
+    <meta name="keywords" content="redis, 设计与实现, 链表" />
     
 
 	
-	<link rel="alternate" type="application/rss+xml" href="https://ymfeb.cn/posts/index.xml" title="云起" />
-    
     
     <link rel="shortcut icon" href="https://ymfeb.cn/images/favicon.ico" />
 
@@ -83,32 +86,84 @@
     </div>
 </div>
         <div class="content">
-            <div class="list_with_title">
-                
-                <div class="listing_title">2020</div>
-                <div class="listing">
-                    
-                    <div class="listing_item">
-                        <div class="listing_post">
-                            <a href="/posts/redis/linkedlist/">redis数据结构之链表</a>
-                            <div class="post_time"><span class="date">12-13</span></div>
-                        </div>
+            <div class="post_page">
+                <div class="post animate__animated animate__fadeInDown">
+                    <div class="post_title post_detail_title">
+                        <h2><a href='/posts/redis/linkedlist/'>redis数据结构之链表</a></h2>
+                        <span class="date">2020.12.13</span>
                     </div>
-                    
-                    <div class="listing_item">
-                        <div class="listing_post">
-                            <a href="/posts/redis/sds_struct/">redis数据结构之简单动态字符串</a>
-                            <div class="post_time"><span class="date">12-12</span></div>
+                    <div class="post_content markdown"><p>链表被广泛用于实现redis的各种功能，如：列表键，发布与订阅，慢查询，监视器等</p>
+<h3 id="redis链表的结构">Redis链表的结构</h3>
+<pre><code>//单节点
+typedef struct listNode {
+	//前置节点
+	struct listNode * prev ;
+	//后置节点
+	struct listNode * next ;
+	//节点值
+	void * value ;
+} listNode ;
+
+//redis链表
+typedef struct list {
+	//表头节点
+	listNode * head ;
+	//表尾节点
+	listNode * tail ;
+	//链表所包含的节点数量
+	unsigned long len ;
+	//节点值复制函数
+	void * (*dump) (void *ptr) ;
+	//节点值释放函数
+	void * (*free) (void *ptr) ;
+	//节点值对比函数
+	int (*match) (void *ptr, void *key) ;
+} list ;
+</code></pre><h3 id="redis链表的特性">Redis链表的特性</h3>
+<ul>
+<li>
+<p>双端：带有前后节点的指针，获取某个节点的前置节点与后置节点的复杂度都是O(1)</p>
+</li>
+<li>
+<p>无环：表头节点的prev指针与表尾节点的next指针都指向NULL，对链表的访问以NULL为终点</p>
+</li>
+<li>
+<p>带表头指针与表尾指针：通过list结构的head指针与tail指针，程序获取链表表头节点和表尾节点的复杂度为O(1)</p>
+</li>
+<li>
+<p>带链表长度计数器：程序使用list结构的len属性来记录持有的节点数量，程序获取链表中节点数量的复杂度为o(1)</p>
+</li>
+<li>
+<p>多态：链表节点使用void* 指针来保存节点值，并通过list结构的dup,free,match三个属性为节点值设置类型特定函数，所以链表可以用于保存各种不同类型的值</p>
+</li>
+</ul>
+<h3 id="链表的优点与缺点">链表的优点与缺点</h3>
+<p>双端链表的优势在于便于在表的两端进行push和pop操作，在插入节点上复杂度很低，但它内存开销比较大。</p>
+<p>首先，双端链表每个节点除了要保存数据之外，还要保存2个额外的指针；其次，双端链表的各个节点是单独的内存块，地址不连续，节点多了容易产生内存碎片</p>
+</div>
+                    <div class="post_footer">
+                        
+                        <div class="meta">
+                            <div class="info">
+                                <span class="field tags">
+                                    <i class="ri-stack-line"></i>
+                                    
+                                    <a href="https://ymfeb.cn/tags/redis/">redis</a>
+                                    
+                                </span>
+                            </div>
                         </div>
+                        
                     </div>
-                    
                 </div>
                 
+                
+                <div class="doc_comments"></div>
+                
             </div>
-            <div class="pagination"></div>
         </div>
-        <a id="back_to_top" href="#" class="back_to_top"><i class="ri-arrow-up-s-line"></i></a>
     </div>
+    <a id="back_to_top" href="#" class="back_to_top"><i class="ri-arrow-up-s-line"></i></a>
     <footer class="footer">
     <div class="powered_by">
         <span>@2020 云起 Powered by hugo Theme by zozo</span>
