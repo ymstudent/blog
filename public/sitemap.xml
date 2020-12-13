@@ -3,32 +3,32 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>http://example.org/posts/</loc>
+    <loc>https://ymfeb.cn/posts/</loc>
     <lastmod>2020-12-12T22:43:39+08:00</lastmod>
   </url>
   
   <url>
-    <loc>http://example.org/tags/redis/</loc>
+    <loc>https://ymfeb.cn/tags/redis/</loc>
     <lastmod>2020-12-12T22:43:39+08:00</lastmod>
   </url>
   
   <url>
-    <loc>http://example.org/posts/redis/sds_struct/</loc>
+    <loc>https://ymfeb.cn/posts/redis/sds_struct/</loc>
     <lastmod>2020-12-12T22:43:39+08:00</lastmod>
   </url>
   
   <url>
-    <loc>http://example.org/tags/</loc>
+    <loc>https://ymfeb.cn/tags/</loc>
     <lastmod>2020-12-12T22:43:39+08:00</lastmod>
   </url>
   
   <url>
-    <loc>http://example.org/</loc>
+    <loc>https://ymfeb.cn/</loc>
     <lastmod>2020-12-12T22:43:39+08:00</lastmod>
   </url>
   
   <url>
-    <loc>http://example.org/categories/</loc>
+    <loc>https://ymfeb.cn/categories/</loc>
   </url>
   
 </urlset>
