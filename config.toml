@@ -1,3 +1,49 @@
 baseURL = "http://example.org/"
-languageCode = "en-us"
-title = "My New Hugo Site"
+languageCode = "zh-cn"
+hasCJKLanguage = true
+title = "云起"
+summaryLength = 100
+paginate = 5
+theme = "zozo"
+
+[author]                               # essential                     # 必需
+  name = "VarKai"
+
+[blackfriday]
+  smartypants = true
+
+[[menu.main]]                          # config your menu  # 配置菜单
+  name = "Home"
+  weight = 10
+  identifier = "home"
+  url = "/"
+[[menu.main]]
+  name = "Archive"
+  weight = 20
+  identifier = "archive"
+  url = "/posts/"
+[[menu.main]]
+  name = "Tags"
+  weight = 30
+  identifier = "tags"
+  url = "/tags/"
+[[menu.main]]
+  name = "About"
+  weight = 40
+  identifier = "about"
+  url = "/about/"
+
+[Params]
+  subtitle = "道阻且长，行则将至"
+  footerSlogan = "@2020 云起 Powered by hugo Theme by zozo"
+  enableMathJax = true                                                 # enable mathjax  # 是否使用mathjax（数学公式）
+  enableSummary = true                                                 # display the article summary  # 是否显示文章摘要
+  mainSections = ["posts","post"]
+
+[social]
+  github = "https://github.com/ymstudent"
+
+[markup]
+[markup.goldmark]
+[markup.goldmark.renderer]
+  unsafe = true
