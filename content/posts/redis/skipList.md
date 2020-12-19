@@ -2,7 +2,7 @@
 title: "redis数据结构之跳跃表"
 date: 2020-12-19T21:42:07+08:00
 draft: false
-tags: ["reids"]
+tags: ["redis"]
 keywords: ["redis", "设计与实现", "跳跃表", "skipList"]
 ---
 

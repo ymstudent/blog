@@ -8,12 +8,12 @@
   </url>
   
   <url>
-    <loc>https://ymfeb.cn/posts/redis/skiplist/</loc>
+    <loc>https://ymfeb.cn/tags/redis/</loc>
     <lastmod>2020-12-19T21:42:07+08:00</lastmod>
   </url>
   
   <url>
-    <loc>https://ymfeb.cn/tags/reids/</loc>
+    <loc>https://ymfeb.cn/posts/redis/skiplist/</loc>
     <lastmod>2020-12-19T21:42:07+08:00</lastmod>
   </url>
   
@@ -25,11 +25,6 @@
   <url>
     <loc>https://ymfeb.cn/</loc>
     <lastmod>2020-12-19T21:42:07+08:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://ymfeb.cn/tags/redis/</loc>
-    <lastmod>2020-12-14T22:28:21+08:00</lastmod>
   </url>
   
   <url>
