@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>reids on 云起</title>
+    <link>https://ymfeb.cn/tags/reids/</link>
+    <description>Recent content in reids on 云起</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-cn</language>
+    <lastBuildDate>Sat, 19 Dec 2020 21:42:07 +0800</lastBuildDate><atom:link href="https://ymfeb.cn/tags/reids/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>redis数据结构之跳跃表</title>
+      <link>https://ymfeb.cn/posts/redis/skiplist/</link>
+      <pubDate>Sat, 19 Dec 2020 21:42:07 +0800</pubDate>
+      
+      <guid>https://ymfeb.cn/posts/redis/skiplist/</guid>
+      <description>跳跃表（skiplist）是一种有序数据结构，他通过节点中维持多个指向其他节点的指针，从而达到快速访问节点的目的。 跳跃表支持平均O（logN），最坏O（N）复杂度的节点查找，还可以通过顺序操作来批量处</description>
+    </item>
+    
+  </channel>
+</rss>

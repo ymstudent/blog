@@ -4,7 +4,27 @@
   
   <url>
     <loc>https://ymfeb.cn/posts/</loc>
-    <lastmod>2020-12-14T22:28:21+08:00</lastmod>
+    <lastmod>2020-12-19T21:42:07+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://ymfeb.cn/posts/redis/skiplist/</loc>
+    <lastmod>2020-12-19T21:42:07+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://ymfeb.cn/tags/reids/</loc>
+    <lastmod>2020-12-19T21:42:07+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://ymfeb.cn/tags/</loc>
+    <lastmod>2020-12-19T21:42:07+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://ymfeb.cn/</loc>
+    <lastmod>2020-12-19T21:42:07+08:00</lastmod>
   </url>
   
   <url>
@@ -14,16 +34,6 @@
   
   <url>
     <loc>https://ymfeb.cn/posts/redis/hashtable/</loc>
-    <lastmod>2020-12-14T22:28:21+08:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://ymfeb.cn/tags/</loc>
-    <lastmod>2020-12-14T22:28:21+08:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://ymfeb.cn/</loc>
     <lastmod>2020-12-14T22:28:21+08:00</lastmod>
   </url>
   
