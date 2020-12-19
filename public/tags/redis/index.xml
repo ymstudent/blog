@@ -6,7 +6,16 @@
     <description>Recent content in redis on 云起</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-cn</language>
-    <lastBuildDate>Sat, 19 Dec 2020 21:42:07 +0800</lastBuildDate><atom:link href="https://ymfeb.cn/tags/redis/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sat, 19 Dec 2020 23:04:04 +0800</lastBuildDate><atom:link href="https://ymfeb.cn/tags/redis/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>redis数据结构之整数集合</title>
+      <link>https://ymfeb.cn/posts/redis/intset/</link>
+      <pubDate>Sat, 19 Dec 2020 23:04:04 +0800</pubDate>
+      
+      <guid>https://ymfeb.cn/posts/redis/intset/</guid>
+      <description>整数集合是Reids集合键的底层实现之一，它可以保存类型为int16_t, int32_t或者int64_t的整数值，并且保证集合中不会出现重复元素。 Redis整数集合的实现 typedef struct inset { //编码方式, 决定c</description>
+    </item>
+    
     <item>
       <title>redis数据结构之跳跃表</title>
       <link>https://ymfeb.cn/posts/redis/skiplist/</link>
