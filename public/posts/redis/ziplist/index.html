@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="zh-cn" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="author" content="VarKai" />
+	
+	
+	
+	<title>redis数据结构之压缩列表 ｜ 云起</title>
+	
+    
+    
+    <meta name="description" content="压缩列表是列表键和哈希键的底层实现之一。它是 redis 为了节约内存而开发的，由一系列特殊编码的连续内存块组成的顺序型数据结构。 压缩列表的实现 一个压缩列表可以包含任意多个节点（entry），每个节点可以保存一个" />
+    
+
+    
+    
+    <meta name="keywords" content="redis, 设计与实现, 压缩列表, zipList" />
+    
+
+	
+    
+    <link rel="shortcut icon" href="https://ymfeb.cn/images/favicon.ico" />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="https://ymfeb.cn/css/normalize.css" />
+    <link rel="stylesheet" type="text/css" media="screen" href="https://cdn.jsdelivr.net/npm/animate.css@4.1.0/animate.min.css" />
+    <link rel="stylesheet" type="text/css" media="screen" href="https://ymfeb.cn/css/zozo.css" />
+	<link rel="stylesheet" type="text/css" media="screen" href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css" />
+    <link rel="stylesheet" type="text/css" media="screen" href="https://ymfeb.cn/css/highlight.css" />
+
+    
+    
+</head>
+
+<body>
+    <div class="main animate__animated animate__fadeInDown">
+        <div class="nav_container animated fadeInDown">
+    <div class="site_nav" id="site_nav">
+        <ul>
+            
+            <li>
+                <a href="/">Home</a>
+            </li>
+            
+            <li>
+                <a href="/posts/">Archive</a>
+            </li>
+            
+            <li>
+                <a href="/tags/">Tags</a>
+            </li>
+            
+            <li>
+                <a href="/about/">About</a>
+            </li>
+            
+        </ul>
+    </div>
+    <div class="menu_icon">
+        <a id="menu_icon"><i class="ri-menu-line"></i></a>
+    </div>
+</div>
+        <div class="header animated fadeInDown">
+    <div class="site_title_container">
+        <div class="site_title">
+            <h1>
+                <a href="https://ymfeb.cn/">
+                    <span>云起</span>
+                </a>
+            </h1>
+        </div>
+        <div class="description">
+            <p class="sub_title">道阻且长，行则将至</p>
+            <div class="my_socials">
+                
+                
+                <a href="https://github.com/ymstudent" title="github" target="_blank"><i class="ri-github-fill"></i></a>
+                
+                
+                <a href="https://ymfeb.cn/index.xml" type="application/rss+xml" title="rss" target="_blank"><i
+                        class="ri-rss-fill"></i></a>
+            </div>
+        </div>
+    </div>
+</div>
+        <div class="content">
+            <div class="post_page">
+                <div class="post animate__animated animate__fadeInDown">
+                    <div class="post_title post_detail_title">
+                        <h2><a href='/posts/redis/ziplist/'>redis数据结构之压缩列表</a></h2>
+                        <span class="date">2020.12.25</span>
+                    </div>
+                    <div class="post_content markdown"><p>压缩列表是列表键和哈希键的底层实现之一。<strong>它是 redis 为了节约内存而开发的，由一系列特殊编码的连续内存块组成的顺序型数据结构</strong>。</p>
+<h3 id="压缩列表的实现">压缩列表的实现</h3>
+<p>一个压缩列表可以包含任意多个节点（entry），每个节点可以保存一个字节数组或者一个整数值。</p>
+<p>压缩列表的构成：| zlbtypes | zltail | zllen | entry1 | &hellip;. | entryN | zlend |</p>
+<p>压缩列表各组成部分详细说明：</p>
+<table>
+<thead>
+<tr>
+<th>属性</th>
+<th>类型</th>
+<th>长度</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>zlbytes</td>
+<td>uint32_t</td>
+<td>4字节</td>
+<td>记录整个压缩列表占用的内存字节数，对压缩列表进行内存重分配或者是计算 zlend 的位置时使用</td>
+</tr>
+<tr>
+<td>zltail</td>
+<td>uint32_t</td>
+<td>4字节</td>
+<td>记录压缩列表表尾节点距离压缩列表的起始地址有多少字节，通过这个偏移量，程序可以无需遍历整个列表就能确定表尾节点的地址</td>
+</tr>
+<tr>
+<td>zllen</td>
+<td>uint16_t</td>
+<td>2字节</td>
+<td>记录压缩列表包含节点的数量，如果这个值等于 UINT16_MAX(65535) 时，需要遍历整个列表才能计算出真实节点数</td>
+</tr>
+<tr>
+<td>entryX</td>
+<td>列表节点</td>
+<td>不确定</td>
+<td>压缩列表包含的节点</td>
+</tr>
+<tr>
+<td>zlend</td>
+<td>uint8_t</td>
+<td>1字节</td>
+<td>特殊值 0XFF(255)，用于标记压缩列表的末端</td>
+</tr>
+</tbody>
+</table>
+<p>压缩列表节点的的构成：| previous_entry_length | encoding | content |</p>
+<p>节点组成部分详细说明：</p>
+<table>
+<thead>
+<tr>
+<th>属性</th>
+<th>长度</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>previous_entry_length</td>
+<td>1字节或5字节</td>
+<td>记录前一个节点的长度，使程序可以通过当前节点的起始地址来计算出前一个节点的起始地址。如果前一节长度小于 254 字节，那么 previous_entry_length 的长度为 1 字节，否则长度为 5 字节</td>
+</tr>
+<tr>
+<td>encoding</td>
+<td>1字节，2字节或5字节</td>
+<td>记录节点 content 属性保存的数据的类型以及长度</td>
+</tr>
+<tr>
+<td>content</td>
+<td>不确定</td>
+<td>保存节点的值，可以使一个字节数组或一个整数值</td>
+</tr>
+</tbody>
+</table>
+<h3 id="连锁更新">连锁更新</h3>
+<p>假设一个极端情况：在一个压缩列表的中，有多个连续的，长度为 250 字节到 253 字节的节点 e1 到 eN，此时所有节点的  previous_entry_length 都为 1 字节。</p>
+<p>如果我们将一个长度大于 254 字节的新节点 new 设为表头，那么 new 将成为 e1 的前置节点，这时候因为 e1 的 previous_entry_length 仅为 1 个字节，导致没办法保存新节点的长度，所以程序将对压缩列表执行空间重分配操作，将 e1 的 previous_entry_length 属性从1字节扩展为 5 字节。</p>
+<p>现在问题出现了，因为 previous_entry_length 扩展为 5 字节，e1 的长度变为了 254 字节至 257 字节，所以 e2 的 previous_entry_length 属性也必须有进行扩展操作了，以此类推 e3 到 eN ，所有的节点都必须进行内存重分配。</p>
+<p>我们将这种在特殊情况下产生的连续多次空间扩展的操作称为“连锁更新”。添加和删除操作都可能会引发连锁更新。</p>
+<p>因为连锁更新最坏的情况下需要对压缩列表执行 N 次空间重分配操作，而每次空间重分配操作的最坏复杂度为O(N)，所以连锁更新的最坏复杂度为 O ( N^2 )。</p>
+<p>虽然连锁更新的复杂度较高，但考虑到连续出现非常多的节点进行连锁更新的几率是很低的，所以基本上不用担心连锁更新会影响压缩列表的性能。</p>
+<h3 id="压缩列表的优点与缺点">压缩列表的优点与缺点</h3>
+<p>压缩列表的存储在一块连续的内存上，所以存储效率很高。但它不利与修改操作，插入和删除需要频繁申请和释放内存，特别是当压缩列表上的特别长时，一次内存重分配操作可能导致大批量的数据拷贝（连锁更新）。</p>
+</div>
+                    <div class="post_footer">
+                        
+                        <div class="meta">
+                            <div class="info">
+                                <span class="field tags">
+                                    <i class="ri-stack-line"></i>
+                                    
+                                    <a href="https://ymfeb.cn/tags/redis/">redis</a>
+                                    
+                                </span>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+                
+                
+                <div class="doc_comments"></div>
+                
+            </div>
+        </div>
+    </div>
+    <a id="back_to_top" href="#" class="back_to_top"><i class="ri-arrow-up-s-line"></i></a>
+    <footer class="footer">
+    <div class="powered_by">
+        <span>@2020 云起 Powered by hugo Theme by zozo</span>
+    </div>
+
+    <div class="footer_slogan">
+    </div>
+</footer>
+    <script src="https://ymfeb.cn/js/jquery-3.5.1.min.js"></script>
+<link href="https://ymfeb.cn/css/fancybox.min.css" rel="stylesheet">
+<script src="https://ymfeb.cn/js/fancybox.min.js"></script>
+<script src="https://ymfeb.cn/js/zozo.js"></script>
+
+
+<script type="text/javascript" async
+    src="https://cdn.bootcss.com/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        MathJax.Hub.Config({
+            tex2jax: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\[\[', '\]\]']],
+                processEscapes: true,
+                processEnvironments: true,
+                skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+                TeX: {
+                    equationNumbers: { autoNumber: "AMS" },
+                    extensions: ["AMSmath.js", "AMSsymbols.js"]
+                }
+            }
+        });
+
+        MathJax.Hub.Queue(function () {
+            
+            
+            
+            var all = MathJax.Hub.getAllJax(), i;
+            for (i = 0; i < all.length; i += 1) {
+                all[i].SourceElement().parentNode.className += ' has-jax';
+            }
+        });
+    </script>
+
+<style>
+    code.has-jax {
+        font: inherit;
+        font-size: 100%;
+        background: inherit;
+        border: inherit;
+        color: #515151;
+    }
+</style>
+
+
+
+</body>
+
+</html>
