@@ -6,7 +6,16 @@
     <description>Recent content on 云起</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-cn</language>
-    <lastBuildDate>Fri, 25 Dec 2020 22:26:22 +0800</lastBuildDate><atom:link href="https://ymfeb.cn/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sun, 27 Dec 2020 17:57:11 +0800</lastBuildDate><atom:link href="https://ymfeb.cn/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>redis五种对象的底层实现</title>
+      <link>https://ymfeb.cn/posts/redis/redisobject/</link>
+      <pubDate>Sun, 27 Dec 2020 17:57:11 +0800</pubDate>
+      
+      <guid>https://ymfeb.cn/posts/redis/redisobject/</guid>
+      <description>redis 使用对象来表示数据库中的键和值，键总是一个字符串对象，而值则是字符串对象、列表对象、哈希对象、集合对象、有序集合对象中的一个。下面是 redis 对象的数据结构： //redis对象的结构 typedef struct redisObject { //类型 unsigned type:4; //</description>
+    </item>
+    
     <item>
       <title>redis数据结构之压缩列表</title>
       <link>https://ymfeb.cn/posts/redis/ziplist/</link>

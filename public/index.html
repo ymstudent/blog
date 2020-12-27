@@ -88,6 +88,37 @@
 
 <div class="post animated fadeInDown">
     <div class="post_title">
+        <h2><a href='/posts/redis/redisobject/'>redis五种对象的底层实现</a></h2>
+    </div>
+    
+    <div class="list">
+        <div class="post_content markdown">
+            <p>redis 使用对象来表示数据库中的键和值，键总是一个字符串对象，而值则是字符串对象、列表对象、哈希对象、集合对象、有序集合对象中的一个。下面是 redis 对象的数据结构： //redis对象的结构 typedef struct redisObject { //类型 unsigned type:4; //......</p>
+        </div>
+    </div>
+    
+    <div class="post_footer">
+        <div class="meta">
+            <div class="info">
+                <span class="field">
+                    <i class="ri-map-pin-time-line"></i>
+                    <span class="date">2020.12.27</span>
+                </span>
+                
+                <span class="field tags">
+                    <i class="ri-stack-line"></i>
+                    
+                    <a href="https://ymfeb.cn/tags/redis/">redis</a>
+                    
+                </span>
+                
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="post animated fadeInDown">
+    <div class="post_title">
         <h2><a href='/posts/redis/ziplist/'>redis数据结构之压缩列表</a></h2>
     </div>
     
@@ -196,37 +227,6 @@
                 <span class="field">
                     <i class="ri-map-pin-time-line"></i>
                     <span class="date">2020.12.14</span>
-                </span>
-                
-                <span class="field tags">
-                    <i class="ri-stack-line"></i>
-                    
-                    <a href="https://ymfeb.cn/tags/redis/">redis</a>
-                    
-                </span>
-                
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="post animated fadeInDown">
-    <div class="post_title">
-        <h2><a href='/posts/redis/linkedlist/'>redis数据结构之链表</a></h2>
-    </div>
-    
-    <div class="list">
-        <div class="post_content markdown">
-            <p>链表被广泛用于实现redis的各种功能，如：列表键，发布与订阅，慢查询，监视器等 Redis链表的结构 //单节点 typedef struct listNode { //前置节点 struct listNode * prev ; //后置节点 struct listNode * next ; //节点值 void * value ; } listNode ; //redis......</p>
-        </div>
-    </div>
-    
-    <div class="post_footer">
-        <div class="meta">
-            <div class="info">
-                <span class="field">
-                    <i class="ri-map-pin-time-line"></i>
-                    <span class="date">2020.12.13</span>
                 </span>
                 
                 <span class="field tags">

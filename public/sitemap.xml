@@ -4,26 +4,31 @@
   
   <url>
     <loc>https://ymfeb.cn/posts/</loc>
-    <lastmod>2020-12-25T22:26:22+08:00</lastmod>
+    <lastmod>2020-12-27T17:57:11+08:00</lastmod>
   </url>
   
   <url>
     <loc>https://ymfeb.cn/tags/redis/</loc>
-    <lastmod>2020-12-25T22:26:22+08:00</lastmod>
+    <lastmod>2020-12-27T17:57:11+08:00</lastmod>
   </url>
   
   <url>
-    <loc>https://ymfeb.cn/posts/redis/ziplist/</loc>
-    <lastmod>2020-12-25T22:26:22+08:00</lastmod>
+    <loc>https://ymfeb.cn/posts/redis/redisobject/</loc>
+    <lastmod>2020-12-27T17:57:11+08:00</lastmod>
   </url>
   
   <url>
     <loc>https://ymfeb.cn/tags/</loc>
-    <lastmod>2020-12-25T22:26:22+08:00</lastmod>
+    <lastmod>2020-12-27T17:57:11+08:00</lastmod>
   </url>
   
   <url>
     <loc>https://ymfeb.cn/</loc>
+    <lastmod>2020-12-27T17:57:11+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://ymfeb.cn/posts/redis/ziplist/</loc>
     <lastmod>2020-12-25T22:26:22+08:00</lastmod>
   </url>
   
