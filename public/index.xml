@@ -6,7 +6,16 @@
     <description>Recent content on 云起</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-cn</language>
-    <lastBuildDate>Sun, 27 Dec 2020 17:57:11 +0800</lastBuildDate><atom:link href="https://ymfeb.cn/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Thu, 31 Dec 2020 22:51:32 +0800</lastBuildDate><atom:link href="https://ymfeb.cn/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>redis的Server结构与过期键处理</title>
+      <link>https://ymfeb.cn/posts/redis/redisserver/</link>
+      <pubDate>Thu, 31 Dec 2020 22:51:32 +0800</pubDate>
+      
+      <guid>https://ymfeb.cn/posts/redis/redisserver/</guid>
+      <description>redis 服务器将所有数据库都保存在 redisServer 结构的 db 数组中，db 数组的每个项都是一个 redisDb 结构，每个 redisDb 结构代表一个数据库。 redisServer的结构 typedef struct redisServer { //***** //一个数组，保存服务器中的所有数据库 redisDb *db ; //服务器数据</description>
+    </item>
+    
     <item>
       <title>redis五种对象的底层实现</title>
       <link>https://ymfeb.cn/posts/redis/redisobject/</link>

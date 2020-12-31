@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="zh-cn" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="author" content="VarKai" />
+	
+	
+	
+	<title>redis的Server结构与过期键处理 ｜ 云起</title>
+	
+    
+    
+    <meta name="description" content="redis 服务器将所有数据库都保存在 redisServer 结构的 db 数组中，db 数组的每个项都是一个 redisDb 结构，每个 redisDb 结构代表一个数据库。 redisServer的结构 typedef struct redisServer { //***** //一个数组，保存服务器中的所有数据库 redisDb *db ; //服务器数据" />
+    
+
+    
+
+	
+    
+    <link rel="shortcut icon" href="https://ymfeb.cn/images/favicon.ico" />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="https://ymfeb.cn/css/normalize.css" />
+    <link rel="stylesheet" type="text/css" media="screen" href="https://cdn.jsdelivr.net/npm/animate.css@4.1.0/animate.min.css" />
+    <link rel="stylesheet" type="text/css" media="screen" href="https://ymfeb.cn/css/zozo.css" />
+	<link rel="stylesheet" type="text/css" media="screen" href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css" />
+    <link rel="stylesheet" type="text/css" media="screen" href="https://ymfeb.cn/css/highlight.css" />
+
+    
+    
+</head>
+
+<body>
+    <div class="main animate__animated animate__fadeInDown">
+        <div class="nav_container animated fadeInDown">
+    <div class="site_nav" id="site_nav">
+        <ul>
+            
+            <li>
+                <a href="/">Home</a>
+            </li>
+            
+            <li>
+                <a href="/posts/">Archive</a>
+            </li>
+            
+            <li>
+                <a href="/tags/">Tags</a>
+            </li>
+            
+            <li>
+                <a href="/about/">About</a>
+            </li>
+            
+        </ul>
+    </div>
+    <div class="menu_icon">
+        <a id="menu_icon"><i class="ri-menu-line"></i></a>
+    </div>
+</div>
+        <div class="header animated fadeInDown">
+    <div class="site_title_container">
+        <div class="site_title">
+            <h1>
+                <a href="https://ymfeb.cn/">
+                    <span>云起</span>
+                </a>
+            </h1>
+        </div>
+        <div class="description">
+            <p class="sub_title">道阻且长，行则将至</p>
+            <div class="my_socials">
+                
+                
+                <a href="https://github.com/ymstudent" title="github" target="_blank"><i class="ri-github-fill"></i></a>
+                
+                
+                <a href="https://ymfeb.cn/index.xml" type="application/rss+xml" title="rss" target="_blank"><i
+                        class="ri-rss-fill"></i></a>
+            </div>
+        </div>
+    </div>
+</div>
+        <div class="content">
+            <div class="post_page">
+                <div class="post animate__animated animate__fadeInDown">
+                    <div class="post_title post_detail_title">
+                        <h2><a href='/posts/redis/redisserver/'>redis的Server结构与过期键处理</a></h2>
+                        <span class="date">2020.12.31</span>
+                    </div>
+                    <div class="post_content markdown"><p>redis 服务器将所有数据库都保存在 redisServer 结构的 db 数组中，db 数组的每个项都是一个 redisDb 结构，每个 redisDb 结构代表一个数据库。</p>
+<h3 id="redisserver的结构">redisServer的结构</h3>
+<pre><code>typedef struct redisServer {
+	//*****
+	//一个数组，保存服务器中的所有数据库
+	redisDb *db ;
+	//服务器数据库数量
+	int dbnum ;
+	//*****
+} ;
+
+typedef struct redisDb {
+	//数据库键空间，保存数据库中的所有键值对
+	dict *dict ;
+	//过期字典，保存数据库中所有键的过期时间
+	dict *expires ;
+}
+</code></pre><h3 id="redisclient的结构">redisClient的结构</h3>
+<p>redis服务器会为每个连接进来的客户端创建一个redisClient结构，用来保存客户端的相关状态</p>
+<pre><code>typedef stuct redisClient {
+	//记录当前客户端正在使用的数据库，通过修改db指针，让它指向服务器中不同的数据库，就可以实现切换数据库的功能
+	redisDb *db ;
+}
+</code></pre><h3 id="redis读写数据时的额外操作">redis读写数据时的额外操作</h3>
+<ul>
+<li>
+<p>在读取一个键后，根据键是否存在更新服务器键空间的命中 ( hit ) 次数或键空间不命中 ( miss ) 次数，这两个值可以通过 INFO status 命令的 keyspace_hits 和 keyspace_misses 属性查看</p>
+</li>
+<li>
+<p>在读取一个键后，更新键的 LRU 时间，使用 OBJECT idletime 命令可以查询键的闲置时间</p>
+</li>
+<li>
+<p>在读取一个键时，如果发现键已经过期，会先删除过期键，再进行其他操作</p>
+</li>
+<li>
+<p>如果有客户端使用 WATCH 命令监视了某个键，那么在服务器对被监视的键进行修改后，会将这个键标记为 dity，从而让事务注意到这个键已经被修改</p>
+</li>
+<li>
+<p>服务器每次修改一个键之后，都会对 dity 键计数器的值增1，这个计数器会引发服务器的持久化以及复制操作</p>
+</li>
+<li>
+<p>如果服务器开启了数据库通知功能，在对键进行修改后，服务器降按配置发送相应的数据库通知</p>
+</li>
+</ul>
+<h3 id="键的生存时间与过期时间">键的生存时间与过期时间</h3>
+<ul>
+<li>
+<p>生存时间是一个时间值，表示从当前时间开始，经过多少秒或者毫秒后键过期。可以通过 EXPIRE 或 PEXPIRE 命令设置键的生存时间</p>
+</li>
+<li>
+<p>过期时间是一个 unix 时间戳，在到达该时间后键过期。可以通过 EXPIREAT 或 PEXPIREAT 设置键的过期时间</p>
+</li>
+<li>
+<p>虽然以上4个命令参数看起来各不相同，但其实底层都是通过 PEXIREAT 命令来实现的，所以无论执行的命令是哪一个，经过转化后，最终执行效果都和执行 PEXPIREAT 命令一样</p>
+</li>
+<li>
+<p>键的过期时间保存在数据库的过期字典 expires 中</p>
+</li>
+</ul>
+<h3 id="过期键的删除策略">过期键的删除策略</h3>
+<p>redis采用惰性删除与定期删除两种策略结合的模式来删除过期键。</p>
+<ul>
+<li>
+<p>惰性删除策略的实现：redis 通过 db.c/expireIfNeed 函数实现惰性删除，所有读写数据库的命令在执行之前都会调用 expireIfNeed 函数对输入的键进行检查，如果键已过期，就从数据库中删除该键，后续操作按照键不存在来处理</p>
+</li>
+<li>
+<p>定期删除策略的实现：redis 通过 redis.c/activeExpireCycle 函数实现定期删除，每当服务器周期函数 redis.c/serverCron 执行时，activeExpireCycle 函数就会被调用。</p>
+<p>activeExpireCycle每次运行时都会从一定数量的数据库中取出一定数量的随机键进行检查，并删除其中的过期键；全局变量current_db会记录当前检查的进度，并在下一次activeExpireCycle调用时接着上一次的进度进行处理；随着activeExpireCycle函数不断进行，服务器的所有数据库都会被检查一遍，这时函数将crueent_db重置为0，并开始新一轮的检查</p>
+</li>
+</ul>
+<h3 id="redis的六种内存淘汰策略">redis的六种内存淘汰策略</h3>
+<p>除了删除过期键，redis 还提供了六种内存淘汰策略，当实际内存超过 maxmemory 时，redis 就会根据 maxmemory-policy 设置的内存淘汰策略删除无用的 key 从而降低内存的使用率：</p>
+<ul>
+<li>volatile-lru：从 expires 中挑选出最近最少使用的数据淘汰（ LRU算法 ）。没有设置过期时间的 key 不会被淘汰。这样使得在增加内存空间的同时保证需要持久话的数据不会丢失</li>
+<li>volatile-ttl：从 expires 中根据 key 的过期时间进行淘汰，越早过期的越优先被淘汰</li>
+<li>volatile-random：从 expires 中随机选择数据淘汰</li>
+<li>allkeys-lru：从 dict 中挑选最近最少使用的数据淘汰</li>
+<li>allkeys-random：从 dict 中随机选择数据淘汰</li>
+<li>no-enviction：禁止驱逐数据。当内存不足以容纳新入数据时，新写入操作就会报错。为系统默认淘汰策略</li>
+</ul>
+<h3 id="rdbaof和复制功能对过期键的处理">RDB、AOF和复制功能对过期键的处理</h3>
+<h4 id="rdb的处理">RDB的处理</h4>
+<ul>
+<li>
+<p>服务器使用 SAVE 或 BGSAVE 命令创建一个 RDB 文件时，程序会对数据库中的键进行检查，已过期的键不会被保存到新创建的 RDB 文件中</p>
+</li>
+<li>
+<p>服务器载入 RDB 文件时，如果是主服务器，在载入时会对 RDB 文件中的键进行检查，如果过期则不会载入；如果服务器是从服务器，在载入 RDB 文件时，文件中保存的所有键都会被载入数据库，但是在从服务器与主服务器进行数据同步时，从服务器中的数据会被清空。所以过期键也不会对 RDB 载入造成影响</p>
+</li>
+</ul>
+<h4 id="aof的处理">AOF的处理</h4>
+<ul>
+<li>
+<p>如果服务器以 AOF 持久化模式运行时，<strong>只有当过期键被删除时</strong>，程序才会向 AOF 文件追加一条 DEL 命令，如果键只是过期而未被删除，这个键不会对 AOF 文件造成任何影响</p>
+</li>
+<li>
+<p>AOF 重写时，程序会对服务器中的键进行检查，已过期的键不会被保存到重写后的 AOF 文件</p>
+</li>
+</ul>
+<h4 id="复制的处理">复制的处理</h4>
+<p>当服务器运行在复制模式下时，从服务器的过期键删除操作由主服务器控制，这样可以保证主从服务器数据的一致性</p>
+<ul>
+<li>
+<p>主服务器在删除一个过期键后，会显示的向所有从服务器发送一个 DEL 命令，通知服务器删除这个过期键</p>
+</li>
+<li>
+<p>从服务器在执行客户端发送的读命令时，<strong>即使碰到过期键也不会讲过期键删除，而是继续像处理未过期的键一样来处理过期键</strong></p>
+</li>
+<li>
+<p>从服务器只有在接到主服务发送的 DEL 命令后，才会删除过期键</p>
+</li>
+</ul>
+</div>
+                    <div class="post_footer">
+                        
+                        <div class="meta">
+                            <div class="info">
+                                <span class="field tags">
+                                    <i class="ri-stack-line"></i>
+                                    
+                                    <a href="https://ymfeb.cn/tags/redis/">redis</a>
+                                    
+                                </span>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+                
+                
+                <div class="doc_comments"></div>
+                
+            </div>
+        </div>
+    </div>
+    <a id="back_to_top" href="#" class="back_to_top"><i class="ri-arrow-up-s-line"></i></a>
+    <footer class="footer">
+    <div class="powered_by">
+        <span>@2020 云起 Powered by hugo Theme by zozo</span>
+    </div>
+
+    <div class="footer_slogan">
+    </div>
+</footer>
+    <script src="https://ymfeb.cn/js/jquery-3.5.1.min.js"></script>
+<link href="https://ymfeb.cn/css/fancybox.min.css" rel="stylesheet">
+<script src="https://ymfeb.cn/js/fancybox.min.js"></script>
+<script src="https://ymfeb.cn/js/zozo.js"></script>
+
+
+<script type="text/javascript" async
+    src="https://cdn.bootcss.com/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        MathJax.Hub.Config({
+            tex2jax: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\[\[', '\]\]']],
+                processEscapes: true,
+                processEnvironments: true,
+                skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+                TeX: {
+                    equationNumbers: { autoNumber: "AMS" },
+                    extensions: ["AMSmath.js", "AMSsymbols.js"]
+                }
+            }
+        });
+
+        MathJax.Hub.Queue(function () {
+            
+            
+            
+            var all = MathJax.Hub.getAllJax(), i;
+            for (i = 0; i < all.length; i += 1) {
+                all[i].SourceElement().parentNode.className += ' has-jax';
+            }
+        });
+    </script>
+
+<style>
+    code.has-jax {
+        font: inherit;
+        font-size: 100%;
+        background: inherit;
+        border: inherit;
+        color: #515151;
+    }
+</style>
+
+
+
+</body>
+
+</html>
