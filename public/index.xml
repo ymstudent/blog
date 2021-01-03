@@ -6,7 +6,16 @@
     <description>Recent content on 云起</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-cn</language>
-    <lastBuildDate>Sun, 03 Jan 2021 20:42:56 +0800</lastBuildDate><atom:link href="https://ymfeb.cn/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sun, 03 Jan 2021 21:25:17 +0800</lastBuildDate><atom:link href="https://ymfeb.cn/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Redis AOF持久化</title>
+      <link>https://ymfeb.cn/posts/redis/aof/</link>
+      <pubDate>Sun, 03 Jan 2021 21:25:17 +0800</pubDate>
+      
+      <guid>https://ymfeb.cn/posts/redis/aof/</guid>
+      <description>Redis AOF 是以文本日志的形式记录 Redis 处理的每一个写入或删除操作。 AOF 对日志文件的写入操作使用的追加模式，有灵活的同步策略，支持每秒同步、每次修改同步和不同步，缺点就是相同规模的数据集，AOF 要大于 RDB，AOF</description>
+    </item>
+    
     <item>
       <title>Redis RDB持久化</title>
       <link>https://ymfeb.cn/posts/redis/rdb/</link>

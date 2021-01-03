@@ -88,6 +88,37 @@
 
 <div class="post animated fadeInDown">
     <div class="post_title">
+        <h2><a href='/posts/redis/aof/'>Redis AOF持久化</a></h2>
+    </div>
+    
+    <div class="list">
+        <div class="post_content markdown">
+            <p>Redis AOF 是以文本日志的形式记录 Redis 处理的每一个写入或删除操作。 AOF 对日志文件的写入操作使用的追加模式，有灵活的同步策略，支持每秒同步、每次修改同步和不同步，缺点就是相同规模的数据集，AOF 要大于 RDB，AOF......</p>
+        </div>
+    </div>
+    
+    <div class="post_footer">
+        <div class="meta">
+            <div class="info">
+                <span class="field">
+                    <i class="ri-map-pin-time-line"></i>
+                    <span class="date">2021.01.03</span>
+                </span>
+                
+                <span class="field tags">
+                    <i class="ri-stack-line"></i>
+                    
+                    <a href="https://ymfeb.cn/tags/redis/">redis</a>
+                    
+                </span>
+                
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="post animated fadeInDown">
+    <div class="post_title">
         <h2><a href='/posts/redis/rdb/'>Redis RDB持久化</a></h2>
     </div>
     
@@ -196,37 +227,6 @@
                 <span class="field">
                     <i class="ri-map-pin-time-line"></i>
                     <span class="date">2020.12.25</span>
-                </span>
-                
-                <span class="field tags">
-                    <i class="ri-stack-line"></i>
-                    
-                    <a href="https://ymfeb.cn/tags/redis/">redis</a>
-                    
-                </span>
-                
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="post animated fadeInDown">
-    <div class="post_title">
-        <h2><a href='/posts/redis/intset/'>redis数据结构之整数集合</a></h2>
-    </div>
-    
-    <div class="list">
-        <div class="post_content markdown">
-            <p>整数集合是Reids集合键的底层实现之一，它可以保存类型为int16_t, int32_t或者int64_t的整数值，并且保证集合中不会出现重复元素。 Redis整数集合的实现 typedef struct inset { //编码方式, 决定c......</p>
-        </div>
-    </div>
-    
-    <div class="post_footer">
-        <div class="meta">
-            <div class="info">
-                <span class="field">
-                    <i class="ri-map-pin-time-line"></i>
-                    <span class="date">2020.12.19</span>
                 </span>
                 
                 <span class="field tags">
