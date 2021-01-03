@@ -88,6 +88,37 @@
 
 <div class="post animated fadeInDown">
     <div class="post_title">
+        <h2><a href='/posts/redis/rdb/'>Redis RDB持久化</a></h2>
+    </div>
+    
+    <div class="list">
+        <div class="post_content markdown">
+            <p>Redis RDB 是把内存中的数据集以快照形式写入磁盘，采用二进制压缩存储。 RDB 把整个 Redis 的数据保存在单一文件中，比较适合用来做冷备，但缺点是快照保存完成之前如果宕机，这段时间的数据将会丢失，另外保存快照时可能导致服务......</p>
+        </div>
+    </div>
+    
+    <div class="post_footer">
+        <div class="meta">
+            <div class="info">
+                <span class="field">
+                    <i class="ri-map-pin-time-line"></i>
+                    <span class="date">2021.01.03</span>
+                </span>
+                
+                <span class="field tags">
+                    <i class="ri-stack-line"></i>
+                    
+                    <a href="https://ymfeb.cn/tags/redis/">redis</a>
+                    
+                </span>
+                
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="post animated fadeInDown">
+    <div class="post_title">
         <h2><a href='/posts/redis/redisserver/'>redis的Server结构与过期键处理</a></h2>
     </div>
     
@@ -187,37 +218,6 @@
     <div class="list">
         <div class="post_content markdown">
             <p>整数集合是Reids集合键的底层实现之一，它可以保存类型为int16_t, int32_t或者int64_t的整数值，并且保证集合中不会出现重复元素。 Redis整数集合的实现 typedef struct inset { //编码方式, 决定c......</p>
-        </div>
-    </div>
-    
-    <div class="post_footer">
-        <div class="meta">
-            <div class="info">
-                <span class="field">
-                    <i class="ri-map-pin-time-line"></i>
-                    <span class="date">2020.12.19</span>
-                </span>
-                
-                <span class="field tags">
-                    <i class="ri-stack-line"></i>
-                    
-                    <a href="https://ymfeb.cn/tags/redis/">redis</a>
-                    
-                </span>
-                
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="post animated fadeInDown">
-    <div class="post_title">
-        <h2><a href='/posts/redis/skiplist/'>redis数据结构之跳跃表</a></h2>
-    </div>
-    
-    <div class="list">
-        <div class="post_content markdown">
-            <p>跳跃表（skiplist）是一种有序数据结构，他通过节点中维持多个指向其他节点的指针，从而达到快速访问节点的目的。 跳跃表支持平均O（logN），最坏O（N）复杂度的节点查找，还可以通过顺序操作来批量处......</p>
         </div>
     </div>
     

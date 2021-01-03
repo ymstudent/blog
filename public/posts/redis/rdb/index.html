@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="zh-cn" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="author" content="VarKai" />
+	
+	
+	
+	<title>Redis RDB持久化 ｜ 云起</title>
+	
+    
+    
+    <meta name="description" content="Redis RDB 是把内存中的数据集以快照形式写入磁盘，采用二进制压缩存储。 RDB 把整个 Redis 的数据保存在单一文件中，比较适合用来做冷备，但缺点是快照保存完成之前如果宕机，这段时间的数据将会丢失，另外保存快照时可能导致服务" />
+    
+
+    
+    
+    <meta name="keywords" content="redis, RDB持久化" />
+    
+
+	
+    
+    <link rel="shortcut icon" href="https://ymfeb.cn/images/favicon.ico" />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="https://ymfeb.cn/css/normalize.css" />
+    <link rel="stylesheet" type="text/css" media="screen" href="https://cdn.jsdelivr.net/npm/animate.css@4.1.0/animate.min.css" />
+    <link rel="stylesheet" type="text/css" media="screen" href="https://ymfeb.cn/css/zozo.css" />
+	<link rel="stylesheet" type="text/css" media="screen" href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css" />
+    <link rel="stylesheet" type="text/css" media="screen" href="https://ymfeb.cn/css/highlight.css" />
+
+    
+    
+</head>
+
+<body>
+    <div class="main animate__animated animate__fadeInDown">
+        <div class="nav_container animated fadeInDown">
+    <div class="site_nav" id="site_nav">
+        <ul>
+            
+            <li>
+                <a href="/">Home</a>
+            </li>
+            
+            <li>
+                <a href="/posts/">Archive</a>
+            </li>
+            
+            <li>
+                <a href="/tags/">Tags</a>
+            </li>
+            
+            <li>
+                <a href="/about/">About</a>
+            </li>
+            
+        </ul>
+    </div>
+    <div class="menu_icon">
+        <a id="menu_icon"><i class="ri-menu-line"></i></a>
+    </div>
+</div>
+        <div class="header animated fadeInDown">
+    <div class="site_title_container">
+        <div class="site_title">
+            <h1>
+                <a href="https://ymfeb.cn/">
+                    <span>云起</span>
+                </a>
+            </h1>
+        </div>
+        <div class="description">
+            <p class="sub_title">道阻且长，行则将至</p>
+            <div class="my_socials">
+                
+                
+                <a href="https://github.com/ymstudent" title="github" target="_blank"><i class="ri-github-fill"></i></a>
+                
+                
+                <a href="https://ymfeb.cn/index.xml" type="application/rss+xml" title="rss" target="_blank"><i
+                        class="ri-rss-fill"></i></a>
+            </div>
+        </div>
+    </div>
+</div>
+        <div class="content">
+            <div class="post_page">
+                <div class="post animate__animated animate__fadeInDown">
+                    <div class="post_title post_detail_title">
+                        <h2><a href='/posts/redis/rdb/'>Redis RDB持久化</a></h2>
+                        <span class="date">2021.01.03</span>
+                    </div>
+                    <div class="post_content markdown"><p>Redis RDB 是把内存中的数据集以快照形式写入磁盘，采用二进制压缩存储。</p>
+<p>RDB 把整个 Redis 的数据保存在单一文件中，<strong>比较适合用来做冷备，但缺点是快照保存完成之前如果宕机，这段时间的数据将会丢失，另外保存快照时可能导致服务短时间不可用</strong>。</p>
+<h3 id="rdb文件的创建">RDB文件的创建</h3>
+<ul>
+<li>
+<p>SAVE 命令创建 RDB 文件会导致服务器阻塞，直到文件创建完毕为止，在服务器进程阻塞期间，服务器不能处理任何命令请求。</p>
+</li>
+<li>
+<p>BGSVAE 命令会 fork 出一个子进程，然后由子进程负载创建 RDB 文件，服务器进程（父进程）继续处理命令请求。在 BGSAVE 执行期间，客户端发送的 SAVE 和 BGSAVE 命令会被服务器拒绝，以防止产生竞争条件。BGREWRITEAOF 命令会在 BGSAVE 命令执行完毕之后执行。</p>
+</li>
+</ul>
+<h3 id="rdb文件的载入">RDB文件的载入</h3>
+<p>redis在启动时如果检测到 RDB 文件的存在，就会自动载入 RDB 文件；但如果服务器开启了 AOF 持久化功能，那么服务器会优先使用AOF 文件来还原数据库。</p>
+<p>在 RDB 文件载入期间，服务器会一直处于阻塞状态，直到载入工作完成为止。</p>
+<h3 id="自动间隔性保存">自动间隔性保存</h3>
+<p>用户可以通过配置文件设置多个保存条件，只要其中任意一个条件满足，服务器就会执行 BGSAVE 命令。</p>
+<pre><code>save 900 1 //服务器在900s内，对数据库至少修改了一次
+save 300 10 //服务器在300s内，对数据库至少修改了10次
+save 60 10000 //服务器在60s内，对数据库至少修改了10000次
+</code></pre><p>redis自动间隔保存的实现</p>
+<pre><code>struct redisServer {
+	//记录了保存条件的数组
+	struct saveparam *saveparams ;
+	//修改计数器，服务器每修改一个键后，都会将dity计数器+1
+	long long dity ;
+	//上次执行保存的时间
+	time_t lastsave ;
+}
+
+struct saveparam {
+	//秒数
+	time_t seconds ;
+	//修改数
+	int changes ;
+}
+
+//自动保存实现伪代码
+def serverCron {
+	//遍历所有保存条件
+	for saveparam in server.saveparams :
+	//计算距离上次执行保存操作有多少秒
+	save_interval = unixtime_now ( ) - server.lastsave ;
+	//如果修改次数和保存间隔都满足，就执行保存操作
+	if server.dity &gt;= saveparam.changes and save_interval &gt; saveparam.seconds :
+	BGASEVE()
+}
+</code></pre><h3 id="rdb文件的结构了解">RDB文件的结构（了解）</h3>
+<p>RDB是一个被压缩的二进制文件，它由如下5个部分组成：| REDIS | db_version | database | EOF | check_sum |</p>
+<table>
+<thead>
+<tr>
+<th>属性</th>
+<th>长度</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>REDIS</td>
+<td>5字节</td>
+<td>RDB文件标识</td>
+</tr>
+<tr>
+<td>db_version</td>
+<td>4字节</td>
+<td>RDB文件版本号</td>
+</tr>
+<tr>
+<td>database</td>
+<td>不确定</td>
+<td>包含零个或任意多个数据库以及其中的键值对</td>
+</tr>
+<tr>
+<td>EOF</td>
+<td>1字节</td>
+<td>文件正式内容结束标识符</td>
+</tr>
+<tr>
+<td>check_sum</td>
+<td>8字节无符号整数</td>
+<td>校验和，检查文件是否有出错或损坏的情况</td>
+</tr>
+</tbody>
+</table>
+</div>
+                    <div class="post_footer">
+                        
+                        <div class="meta">
+                            <div class="info">
+                                <span class="field tags">
+                                    <i class="ri-stack-line"></i>
+                                    
+                                    <a href="https://ymfeb.cn/tags/redis/">redis</a>
+                                    
+                                </span>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+                
+                
+                <div class="doc_comments"></div>
+                
+            </div>
+        </div>
+    </div>
+    <a id="back_to_top" href="#" class="back_to_top"><i class="ri-arrow-up-s-line"></i></a>
+    <footer class="footer">
+    <div class="powered_by">
+        <span>@2020 云起 Powered by hugo Theme by zozo</span>
+    </div>
+
+    <div class="footer_slogan">
+    </div>
+</footer>
+    <script src="https://ymfeb.cn/js/jquery-3.5.1.min.js"></script>
+<link href="https://ymfeb.cn/css/fancybox.min.css" rel="stylesheet">
+<script src="https://ymfeb.cn/js/fancybox.min.js"></script>
+<script src="https://ymfeb.cn/js/zozo.js"></script>
+
+
+<script type="text/javascript" async
+    src="https://cdn.bootcss.com/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        MathJax.Hub.Config({
+            tex2jax: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\[\[', '\]\]']],
+                processEscapes: true,
+                processEnvironments: true,
+                skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+                TeX: {
+                    equationNumbers: { autoNumber: "AMS" },
+                    extensions: ["AMSmath.js", "AMSsymbols.js"]
+                }
+            }
+        });
+
+        MathJax.Hub.Queue(function () {
+            
+            
+            
+            var all = MathJax.Hub.getAllJax(), i;
+            for (i = 0; i < all.length; i += 1) {
+                all[i].SourceElement().parentNode.className += ' has-jax';
+            }
+        });
+    </script>
+
+<style>
+    code.has-jax {
+        font: inherit;
+        font-size: 100%;
+        background: inherit;
+        border: inherit;
+        color: #515151;
+    }
+</style>
+
+
+
+</body>
+
+</html>

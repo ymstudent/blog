@@ -6,7 +6,16 @@
     <description>Recent content in Posts on 云起</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-cn</language>
-    <lastBuildDate>Thu, 31 Dec 2020 22:51:32 +0800</lastBuildDate><atom:link href="https://ymfeb.cn/posts/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sun, 03 Jan 2021 20:42:56 +0800</lastBuildDate><atom:link href="https://ymfeb.cn/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Redis RDB持久化</title>
+      <link>https://ymfeb.cn/posts/redis/rdb/</link>
+      <pubDate>Sun, 03 Jan 2021 20:42:56 +0800</pubDate>
+      
+      <guid>https://ymfeb.cn/posts/redis/rdb/</guid>
+      <description>Redis RDB 是把内存中的数据集以快照形式写入磁盘，采用二进制压缩存储。 RDB 把整个 Redis 的数据保存在单一文件中，比较适合用来做冷备，但缺点是快照保存完成之前如果宕机，这段时间的数据将会丢失，另外保存快照时可能导致服务</description>
+    </item>
+    
     <item>
       <title>redis的Server结构与过期键处理</title>
       <link>https://ymfeb.cn/posts/redis/redisserver/</link>
