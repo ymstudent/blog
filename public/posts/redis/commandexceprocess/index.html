@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="zh-cn" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="author" content="VarKai" />
+	
+	
+	
+	<title>redis命令请求的执行过程 ｜ 云起</title>
+	
+    
+    
+    <meta name="description" content="发送命令请求 当用户在客户端键入一个命令请求时，客户端会将这个命令请求转化成协议格式，然后通过连接到服务器的套接字，将协议格式的命令请求发送给服务器。 eg : SET KEY VALUE 协议转化后： *3\r\n$3\r\nSET\r\nKEY\r\nVALUE\r\n 读取命令请求 客户端与服务器之" />
+    
+
+    
+    
+    <meta name="keywords" content="redis, 命令请求执行过程" />
+    
+
+	
+    
+    <link rel="shortcut icon" href="https://ymfeb.cn/images/favicon.ico" />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="https://ymfeb.cn/css/normalize.css" />
+    <link rel="stylesheet" type="text/css" media="screen" href="https://cdn.jsdelivr.net/npm/animate.css@4.1.0/animate.min.css" />
+    <link rel="stylesheet" type="text/css" media="screen" href="https://ymfeb.cn/css/zozo.css" />
+	<link rel="stylesheet" type="text/css" media="screen" href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css" />
+    <link rel="stylesheet" type="text/css" media="screen" href="https://ymfeb.cn/css/highlight.css" />
+
+    
+    
+</head>
+
+<body>
+    <div class="main animate__animated animate__fadeInDown">
+        <div class="nav_container animated fadeInDown">
+    <div class="site_nav" id="site_nav">
+        <ul>
+            
+            <li>
+                <a href="/">Home</a>
+            </li>
+            
+            <li>
+                <a href="/posts/">Archive</a>
+            </li>
+            
+            <li>
+                <a href="/tags/">Tags</a>
+            </li>
+            
+            <li>
+                <a href="/about/">About</a>
+            </li>
+            
+        </ul>
+    </div>
+    <div class="menu_icon">
+        <a id="menu_icon"><i class="ri-menu-line"></i></a>
+    </div>
+</div>
+        <div class="header animated fadeInDown">
+    <div class="site_title_container">
+        <div class="site_title">
+            <h1>
+                <a href="https://ymfeb.cn/">
+                    <span>云起</span>
+                </a>
+            </h1>
+        </div>
+        <div class="description">
+            <p class="sub_title">道阻且长，行则将至</p>
+            <div class="my_socials">
+                
+                
+                <a href="https://github.com/ymstudent" title="github" target="_blank"><i class="ri-github-fill"></i></a>
+                
+                
+                <a href="https://ymfeb.cn/index.xml" type="application/rss+xml" title="rss" target="_blank"><i
+                        class="ri-rss-fill"></i></a>
+            </div>
+        </div>
+    </div>
+</div>
+        <div class="content">
+            <div class="post_page">
+                <div class="post animate__animated animate__fadeInDown">
+                    <div class="post_title post_detail_title">
+                        <h2><a href='/posts/redis/commandexceprocess/'>redis命令请求的执行过程</a></h2>
+                        <span class="date">2021.01.21</span>
+                    </div>
+                    <div class="post_content markdown"><h3 id="发送命令请求">发送命令请求</h3>
+<p>当用户在客户端键入一个命令请求时，客户端会将这个命令请求转化成协议格式，然后通过连接到服务器的套接字，将协议格式的命令请求发送给服务器。</p>
+<pre><code>eg : SET KEY VALUE
+协议转化后： *3\r\n$3\r\nSET\r\nKEY\r\nVALUE\r\n
+</code></pre><h3 id="读取命令请求">读取命令请求</h3>
+<p>客户端与服务器之间的连接套接字，因为客户端的写入操作而产生 AE_READABLE 事件，这时服务器会调用命令请求处理器来执行以下操作：</p>
+<ul>
+<li>
+<ol>
+<li>读取套接字中协议格式的命令请求，并将其保存到客户端状态的输入缓冲区中</li>
+</ol>
+</li>
+<li>
+<ol start="2">
+<li>对输入缓冲区的命令请求进行分析，将分析出的参数和参数个数保存到客户端的 argv 与 argc 属性中</li>
+</ol>
+</li>
+</ul>
+<h3 id="命令执行器处理命令请求">命令执行器处理命令请求</h3>
+<p>在完成参数分析后，服务器会根据参数执行指定命令。命令执行的过程又分为以下几个阶段：</p>
+<ul>
+<li>
+<ol>
+<li>查找命令实现：根据 argv[0] 参数去命令表（command table）中查找对应的命令，然后将客户端状态的 cmd 指针指向这个命令</li>
+</ol>
+</li>
+<li>
+<ol start="2">
+<li>执行预备操作：在命令执行前，服务器会进行以下检查， 一旦有一个条件未满足，命令都不会被执行</li>
+</ol>
+<ul>
+<li>
+<p>检查客户端的 cmd 指针是否指向 NULL</p>
+</li>
+<li>
+<p>检查命令请求所给的的参数个数是否正确</p>
+</li>
+<li>
+<p>检查客户端是否已通过身份验证</p>
+</li>
+<li>
+<p>检查服务器内存情况</p>
+</li>
+<li>
+<p>检查命令是否具备执行条件</p>
+</li>
+</ul>
+</li>
+<li>
+<ol start="3">
+<li>调用命令的实现函数：命令实现函数会执行指定操作，产生相应回复，并将这些回复保存在客户端状态的输出缓冲区中，然后将客户端的套接字关联命令回复处理器，等待套接字产生 AE_WRITEABLE 事件</li>
+</ol>
+</li>
+<li>
+<ol start="4">
+<li>执行后续工作：在命令执行完成后，服务器会进行一些后续的处理</li>
+</ol>
+<ul>
+<li>
+<p>检查是否开启慢查询日志，如果开启，判断是否需要向慢查询日志中添加一条记录</p>
+</li>
+<li>
+<p>更新 redisCommand 结构的 milliseconds 属性和 calls 计数器</p>
+</li>
+<li>
+<p>检查是否开启AOF持久化，如开启，向AOF缓冲区中添加一条记录</p>
+</li>
+<li>
+<p>检查是否有从服务器正在复制当前服务器，如果有，将刚执行的命令广播给这些从服务器</p>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="将命令请求发送给客户端">将命令请求发送给客户端</h3>
+<p>套接字产生 AE_WRITEABLE 事件后，服务器将命令回复发送给客户端，然后情况客户端的输出缓冲区，等待下一个命令请求。</p>
+<h3 id="客户端接受并打印命令回复">客户端接受并打印命令回复</h3>
+<p>客户端接受到协议格式的回复后，将回复转化为可读格式输出。</p>
+</div>
+                    <div class="post_footer">
+                        
+                        <div class="meta">
+                            <div class="info">
+                                <span class="field tags">
+                                    <i class="ri-stack-line"></i>
+                                    
+                                    <a href="https://ymfeb.cn/tags/redis/">redis</a>
+                                    
+                                </span>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+                
+                
+                <div class="doc_comments"></div>
+                
+            </div>
+        </div>
+    </div>
+    <a id="back_to_top" href="#" class="back_to_top"><i class="ri-arrow-up-s-line"></i></a>
+    <footer class="footer">
+    <div class="powered_by">
+        <span>@2020 云起 Powered by hugo Theme by zozo</span>
+    </div>
+
+    <div class="footer_slogan">
+    </div>
+</footer>
+    <script src="https://ymfeb.cn/js/jquery-3.5.1.min.js"></script>
+<link href="https://ymfeb.cn/css/fancybox.min.css" rel="stylesheet">
+<script src="https://ymfeb.cn/js/fancybox.min.js"></script>
+<script src="https://ymfeb.cn/js/zozo.js"></script>
+
+
+<script type="text/javascript" async
+    src="https://cdn.bootcss.com/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        MathJax.Hub.Config({
+            tex2jax: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\[\[', '\]\]']],
+                processEscapes: true,
+                processEnvironments: true,
+                skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+                TeX: {
+                    equationNumbers: { autoNumber: "AMS" },
+                    extensions: ["AMSmath.js", "AMSsymbols.js"]
+                }
+            }
+        });
+
+        MathJax.Hub.Queue(function () {
+            
+            
+            
+            var all = MathJax.Hub.getAllJax(), i;
+            for (i = 0; i < all.length; i += 1) {
+                all[i].SourceElement().parentNode.className += ' has-jax';
+            }
+        });
+    </script>
+
+<style>
+    code.has-jax {
+        font: inherit;
+        font-size: 100%;
+        background: inherit;
+        border: inherit;
+        color: #515151;
+    }
+</style>
+
+
+
+</body>
+
+</html>
