@@ -88,6 +88,37 @@
 
 <div class="post animated fadeInDown">
     <div class="post_title">
+        <h2><a href='/posts/redis/commandexceprocess/'>redis命令请求的执行过程</a></h2>
+    </div>
+    
+    <div class="list">
+        <div class="post_content markdown">
+            <p>发送命令请求 当用户在客户端键入一个命令请求时，客户端会将这个命令请求转化成协议格式，然后通过连接到服务器的套接字，将协议格式的命令请求发送给服务器。 eg : SET KEY VALUE 协议转化后： *3\r\n$3\r\nSET\r\nKEY\r\nVALUE\r\n 读取命令请求 客户端与服务器之......</p>
+        </div>
+    </div>
+    
+    <div class="post_footer">
+        <div class="meta">
+            <div class="info">
+                <span class="field">
+                    <i class="ri-map-pin-time-line"></i>
+                    <span class="date">2021.01.21</span>
+                </span>
+                
+                <span class="field tags">
+                    <i class="ri-stack-line"></i>
+                    
+                    <a href="https://ymfeb.cn/tags/redis/">redis</a>
+                    
+                </span>
+                
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="post animated fadeInDown">
+    <div class="post_title">
         <h2><a href='/posts/redis/event/'>Redis事件</a></h2>
     </div>
     
@@ -196,37 +227,6 @@
                 <span class="field">
                     <i class="ri-map-pin-time-line"></i>
                     <span class="date">2020.12.31</span>
-                </span>
-                
-                <span class="field tags">
-                    <i class="ri-stack-line"></i>
-                    
-                    <a href="https://ymfeb.cn/tags/redis/">redis</a>
-                    
-                </span>
-                
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="post animated fadeInDown">
-    <div class="post_title">
-        <h2><a href='/posts/redis/redisobject/'>redis五种对象的底层实现</a></h2>
-    </div>
-    
-    <div class="list">
-        <div class="post_content markdown">
-            <p>redis 使用对象来表示数据库中的键和值，键总是一个字符串对象，而值则是字符串对象、列表对象、哈希对象、集合对象、有序集合对象中的一个。下面是 redis 对象的数据结构： //redis对象的结构 typedef struct redisObject { //类型 unsigned type:4; //......</p>
-        </div>
-    </div>
-    
-    <div class="post_footer">
-        <div class="meta">
-            <div class="info">
-                <span class="field">
-                    <i class="ri-map-pin-time-line"></i>
-                    <span class="date">2020.12.27</span>
                 </span>
                 
                 <span class="field tags">
