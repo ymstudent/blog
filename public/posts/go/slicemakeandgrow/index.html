@@ -93,46 +93,46 @@
                         <span class="date">2022.05.15</span>
                     </div>
                     <div class="post_content markdown"><h3 id="内部数据结构">内部数据结构</h3>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">slice</span> <span style="color:#66d9ef">struct</span> {
-  <span style="color:#a6e22e">array</span> <span style="color:#a6e22e">unsafe</span>.<span style="color:#a6e22e">Pointer</span>  <span style="color:#75715e">// 指向底层数组的指针
-</span><span style="color:#75715e"></span>  <span style="color:#a6e22e">len</span>   <span style="color:#66d9ef">int</span>            <span style="color:#75715e">// 长度
-</span><span style="color:#75715e"></span>  <span style="color:#a6e22e">cap</span>   <span style="color:#66d9ef">int</span>            <span style="color:#75715e">// 容量
-</span><span style="color:#75715e"></span>}
-</code></pre></div><h3 id="创建">创建</h3>
+<pre><code>type slice struct {
+  array unsafe.Pointer  // 指向底层数组的指针
+  len   int            // 长度
+  cap   int            // 容量
+}
+</code></pre><h3 id="创建">创建</h3>
 <ul>
 <li>
 <p>var 直接声明</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">ints</span> []<span style="color:#66d9ef">int</span>
-<span style="color:#75715e">// 这种创建方式只声明了切片结构，但没有声明底层数组，所以其底层结构如下
-</span><span style="color:#75715e"></span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">slice</span> <span style="color:#66d9ef">struct</span> {
-  <span style="color:#a6e22e">array</span> <span style="color:#a6e22e">unsafe</span>.<span style="color:#a6e22e">Pointer</span>  <span style="color:#75715e">// nil
-</span><span style="color:#75715e"></span>  <span style="color:#a6e22e">len</span>   <span style="color:#66d9ef">int</span>            <span style="color:#75715e">// 0
-</span><span style="color:#75715e"></span>  <span style="color:#a6e22e">cap</span>   <span style="color:#66d9ef">int</span>            <span style="color:#75715e">// 0
-</span><span style="color:#75715e"></span>}
-</code></pre></div></li>
+<pre><code>var ints []int
+// 这种创建方式只声明了切片结构，但没有声明底层数组，所以其底层结构如下
+type slice struct {
+  array unsafe.Pointer  // nil
+  len   int            // 0
+  cap   int            // 0
+}
+</code></pre></li>
 <li>
 <p>make 创建</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#a6e22e">ints</span> <span style="color:#f92672">:=</span> make([]<span style="color:#66d9ef">int</span>, <span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">5</span>)
-<span style="color:#75715e">// 通过make创建的slice会开辟一个底层数组，并把这个底层数组初始化为整形的默认值 0， 所以其底层结构如下
-</span><span style="color:#75715e"></span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">slice</span> <span style="color:#66d9ef">struct</span> {
-  <span style="color:#a6e22e">array</span> <span style="color:#a6e22e">unsafe</span>.<span style="color:#a6e22e">Pointer</span>  <span style="color:#75715e">// 指向一个长度为5，默认值为0的数组
-</span><span style="color:#75715e"></span>  <span style="color:#a6e22e">len</span>   <span style="color:#66d9ef">int</span>            <span style="color:#75715e">// 2
-</span><span style="color:#75715e"></span>  <span style="color:#a6e22e">cap</span>   <span style="color:#66d9ef">int</span>            <span style="color:#75715e">// 5
-</span><span style="color:#75715e"></span>}
+<pre><code>ints := make([]int, 2, 5)
+// 通过make创建的slice会开辟一个底层数组，并把这个底层数组初始化为整形的默认值 0， 所以其底层结构如下
+type slice struct {
+  array unsafe.Pointer  // 指向一个长度为5，默认值为0的数组
+  len   int            // 2
+  cap   int            // 5
+}
   
-</code></pre></div></li>
+</code></pre></li>
 <li>
 <p>new 创建</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#a6e22e">ints</span> <span style="color:#f92672">:=</span> new([]<span style="color:#66d9ef">int</span>)
-<span style="color:#75715e">// 通过new创建的slice，底层结构与var创建的一样，但new返回的是slice结构的起始地址
-</span><span style="color:#75715e"></span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">slice</span> <span style="color:#66d9ef">struct</span> {
-  <span style="color:#a6e22e">array</span> <span style="color:#a6e22e">unsafe</span>.<span style="color:#a6e22e">Pointer</span>  <span style="color:#75715e">// nil
-</span><span style="color:#75715e"></span>  <span style="color:#a6e22e">len</span>   <span style="color:#66d9ef">int</span>            <span style="color:#75715e">// 0
-</span><span style="color:#75715e"></span>  <span style="color:#a6e22e">cap</span>   <span style="color:#66d9ef">int</span>            <span style="color:#75715e">// 0
-</span><span style="color:#75715e"></span>}
-<span style="color:#75715e">// 此时，slice还没有底层数组，像 (*ints)[0] = 1这样的操作是会报panic的
-</span><span style="color:#75715e">// 通过append的方式添加元素，它就会给slice开辟一个底层数组
-</span></code></pre></div></li>
+<pre><code>ints := new([]int)
+// 通过new创建的slice，底层结构与var创建的一样，但new返回的是slice结构的起始地址
+type slice struct {
+  array unsafe.Pointer  // nil
+  len   int            // 0
+  cap   int            // 0
+}
+// 此时，slice还没有底层数组，像 (*ints)[0] = 1这样的操作是会报panic的
+// 通过append的方式添加元素，它就会给slice开辟一个底层数组
+</code></pre></li>
 </ul>
 <h3 id="扩容策略">扩容策略</h3>
 <p>1、如果oldCap * 2 &lt; newCap, 那么就直接扩容到newCap</p>
@@ -142,64 +142,64 @@
 <p>5、从系统预先创建的内存块中选取合适大小的内存块(runtime/sizeclasses.go中定义)作为实际分配的内存</p>
 <p>6、实际分配的内存 / 元素大小 = 实际扩容后的容量</p>
 <p>eg:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#f92672">package</span> <span style="color:#a6e22e">main</span>
+<pre><code>package main
 
-<span style="color:#f92672">import</span> <span style="color:#e6db74">&#34;fmt&#34;</span>
+import &quot;fmt&quot;
 
-<span style="color:#66d9ef">func</span> <span style="color:#a6e22e">main</span>() {
-	<span style="color:#a6e22e">s</span> <span style="color:#f92672">:=</span> []<span style="color:#66d9ef">int</span>{<span style="color:#ae81ff">1</span>,<span style="color:#ae81ff">2</span>}
-	<span style="color:#a6e22e">s</span> = append(<span style="color:#a6e22e">s</span>,<span style="color:#ae81ff">4</span>,<span style="color:#ae81ff">5</span>,<span style="color:#ae81ff">6</span>)
-	<span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Printf</span>(<span style="color:#e6db74">&#34;len=%d, cap=%d&#34;</span>,len(<span style="color:#a6e22e">s</span>),cap(<span style="color:#a6e22e">s</span>))
+func main() {
+	s := []int{1,2}
+	s = append(s,4,5,6)
+	fmt.Printf(&quot;len=%d, cap=%d&quot;,len(s),cap(s))
 }
-</code></pre></div><p>结合上面的例子来分析源码：</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#75715e">// s 一次性添加3个元素，那么所需的newCap变为5，所以这里的入参为：slice类型 int，slice结构 s，所需容量 5
-</span><span style="color:#75715e"></span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">growslice</span>(<span style="color:#a6e22e">et</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">_type</span>, <span style="color:#a6e22e">old</span> <span style="color:#a6e22e">slice</span>, <span style="color:#a6e22e">cap</span> <span style="color:#66d9ef">int</span>) <span style="color:#a6e22e">slice</span> {
-    <span style="color:#75715e">// ……
-</span><span style="color:#75715e"></span>    <span style="color:#a6e22e">newcap</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">old</span>.<span style="color:#a6e22e">cap</span>
-	<span style="color:#a6e22e">doublecap</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">newcap</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">newcap</span>
-  <span style="color:#75715e">// 所需容量 &gt; oldCap * 2
-</span><span style="color:#75715e"></span>	<span style="color:#66d9ef">if</span> <span style="color:#a6e22e">cap</span> &gt; <span style="color:#a6e22e">doublecap</span> {
-		<span style="color:#a6e22e">newcap</span> = <span style="color:#a6e22e">cap</span> <span style="color:#75715e">//新容量直接变为5
-</span><span style="color:#75715e"></span>	} <span style="color:#66d9ef">else</span> {
-		<span style="color:#66d9ef">if</span> <span style="color:#a6e22e">old</span>.<span style="color:#a6e22e">len</span> &lt; <span style="color:#ae81ff">1024</span> {
-			<span style="color:#a6e22e">newcap</span> = <span style="color:#a6e22e">doublecap</span>
-		} <span style="color:#66d9ef">else</span> {
-			<span style="color:#66d9ef">for</span> <span style="color:#a6e22e">newcap</span> &lt; <span style="color:#a6e22e">cap</span> {
-				<span style="color:#a6e22e">newcap</span> <span style="color:#f92672">+=</span> <span style="color:#a6e22e">newcap</span> <span style="color:#f92672">/</span> <span style="color:#ae81ff">4</span>
+</code></pre><p>结合上面的例子来分析源码：</p>
+<pre><code>// s 一次性添加3个元素，那么所需的newCap变为5，所以这里的入参为：slice类型 int，slice结构 s，所需容量 5
+func growslice(et *_type, old slice, cap int) slice {
+    // ……
+    newcap := old.cap
+	doublecap := newcap + newcap
+  // 所需容量 &gt; oldCap * 2
+	if cap &gt; doublecap {
+		newcap = cap //新容量直接变为5
+	} else {
+		if old.len &lt; 1024 {
+			newcap = doublecap
+		} else {
+			for newcap &lt; cap {
+				newcap += newcap / 4
 			}
 		}
 	}
-	<span style="color:#75715e">// ……
-</span><span style="color:#75715e"></span>	
-  <span style="color:#75715e">// 新容量 * 元素大小，int类型大小为8字节，所以这里入参为：5 * 8 = 40字节的容量
-</span><span style="color:#75715e"></span>	<span style="color:#a6e22e">capmem</span> = <span style="color:#a6e22e">roundupsize</span>(uintptr(<span style="color:#a6e22e">newcap</span>) <span style="color:#f92672">*</span> <span style="color:#a6e22e">ptrSize</span>) <span style="color:#75715e">//roundupsize后，最终返回 48
-</span><span style="color:#75715e"></span>	<span style="color:#a6e22e">newcap</span> = int(<span style="color:#a6e22e">capmem</span> <span style="color:#f92672">/</span> <span style="color:#a6e22e">ptrSize</span>) <span style="color:#75715e">// 48 / 8 = 6，所以最终的newCap为6，长度为5
-</span><span style="color:#75715e"></span>}
-
-<span style="color:#75715e">// 为什么需要roundupsize？在Go语言中申请内存并不是直接与操作系统交涉，而是与语言自身实现的内存管理模块交涉，内存管理模块会提前和操作系统申请一批内存，分成常用的规格管理起来，我们申请内存时，它会为我们匹配到足够大且最接近的规格。 像上面的例子中每个元素的大小为8字节，所以需要分配5 * 8 = 40字节大小的内存，而实际申请时会匹配到48字节，所以实际扩容后的容量为6。
-</span><span style="color:#75715e"></span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">roundupsize</span>(<span style="color:#a6e22e">size</span> <span style="color:#66d9ef">uintptr</span>) <span style="color:#66d9ef">uintptr</span> {
-	<span style="color:#66d9ef">if</span> <span style="color:#a6e22e">size</span> &lt; <span style="color:#a6e22e">_MaxSmallSize</span> {
-		<span style="color:#66d9ef">if</span> <span style="color:#a6e22e">size</span> <span style="color:#f92672">&lt;=</span> <span style="color:#a6e22e">smallSizeMax</span><span style="color:#f92672">-</span><span style="color:#ae81ff">8</span> { <span style="color:#75715e">//40 &lt; 32768 - 8
-</span><span style="color:#75715e"></span>			<span style="color:#66d9ef">return</span> uintptr(<span style="color:#a6e22e">class_to_size</span>[<span style="color:#a6e22e">size_to_class8</span>[<span style="color:#a6e22e">divRoundUp</span>(<span style="color:#a6e22e">size</span>, <span style="color:#a6e22e">smallSizeDiv</span>)]])<span style="color:#75715e">//class_to_size[size_to_class8[5]]，根据索引取出值48
-</span><span style="color:#75715e"></span>		} <span style="color:#66d9ef">else</span> {
-			<span style="color:#66d9ef">return</span> uintptr(<span style="color:#a6e22e">class_to_size</span>[<span style="color:#a6e22e">size_to_class128</span>[<span style="color:#a6e22e">divRoundUp</span>(<span style="color:#a6e22e">size</span><span style="color:#f92672">-</span><span style="color:#a6e22e">smallSizeMax</span>, <span style="color:#a6e22e">largeSizeDiv</span>)]])
-		}
-	}
-	<span style="color:#66d9ef">if</span> <span style="color:#a6e22e">size</span><span style="color:#f92672">+</span><span style="color:#a6e22e">_PageSize</span> &lt; <span style="color:#a6e22e">size</span> {
-		<span style="color:#66d9ef">return</span> <span style="color:#a6e22e">size</span>
-	}
-	<span style="color:#66d9ef">return</span> <span style="color:#a6e22e">alignUp</span>(<span style="color:#a6e22e">size</span>, <span style="color:#a6e22e">_PageSize</span>)
+	// ……
+	
+  // 新容量 * 元素大小，int类型大小为8字节，所以这里入参为：5 * 8 = 40字节的容量
+	capmem = roundupsize(uintptr(newcap) * ptrSize) //roundupsize后，最终返回 48
+	newcap = int(capmem / ptrSize) // 48 / 8 = 6，所以最终的newCap为6，长度为5
 }
 
-<span style="color:#66d9ef">func</span> <span style="color:#a6e22e">divRoundUp</span>(<span style="color:#a6e22e">n</span>, <span style="color:#a6e22e">a</span> <span style="color:#66d9ef">uintptr</span>) <span style="color:#66d9ef">uintptr</span> {
-  <span style="color:#66d9ef">return</span> (<span style="color:#a6e22e">n</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">a</span> <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>) <span style="color:#f92672">/</span> <span style="color:#a6e22e">a</span>  <span style="color:#75715e">// (40 + 8 - 1) / 8 = 5
-</span><span style="color:#75715e"></span>}
+// 为什么需要roundupsize？在Go语言中申请内存并不是直接与操作系统交涉，而是与语言自身实现的内存管理模块交涉，内存管理模块会提前和操作系统申请一批内存，分成常用的规格管理起来，我们申请内存时，它会为我们匹配到足够大且最接近的规格。 像上面的例子中每个元素的大小为8字节，所以需要分配5 * 8 = 40字节大小的内存，而实际申请时会匹配到48字节，所以实际扩容后的容量为6。
+func roundupsize(size uintptr) uintptr {
+	if size &lt; _MaxSmallSize {
+		if size &lt;= smallSizeMax-8 { //40 &lt; 32768 - 8
+			return uintptr(class_to_size[size_to_class8[divRoundUp(size, smallSizeDiv)]])//class_to_size[size_to_class8[5]]，根据索引取出值48
+		} else {
+			return uintptr(class_to_size[size_to_class128[divRoundUp(size-smallSizeMax, largeSizeDiv)]])
+		}
+	}
+	if size+_PageSize &lt; size {
+		return size
+	}
+	return alignUp(size, _PageSize)
+}
 
-<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">class_to_size</span> = [<span style="color:#a6e22e">_NumSizeClasses</span>]<span style="color:#66d9ef">uint16</span>{<span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">8</span>, <span style="color:#ae81ff">16</span>, <span style="color:#ae81ff">24</span>, <span style="color:#ae81ff">32</span>, <span style="color:#ae81ff">48</span>, <span style="color:#ae81ff">64</span>, <span style="color:#ae81ff">80</span>, <span style="color:#ae81ff">96</span>, <span style="color:#ae81ff">112</span>, <span style="color:#ae81ff">128</span>, <span style="color:#ae81ff">144</span>, <span style="color:#ae81ff">160</span>, <span style="color:#ae81ff">176</span>, <span style="color:#ae81ff">192</span>, <span style="color:#ae81ff">208</span>, <span style="color:#ae81ff">224</span>, <span style="color:#ae81ff">240</span>, <span style="color:#ae81ff">256</span>, <span style="color:#ae81ff">288</span>, <span style="color:#ae81ff">320</span>, <span style="color:#ae81ff">352</span>, <span style="color:#ae81ff">384</span>, <span style="color:#ae81ff">416</span>, <span style="color:#ae81ff">448</span>, <span style="color:#ae81ff">480</span>, <span style="color:#ae81ff">512</span>, <span style="color:#ae81ff">576</span>, <span style="color:#ae81ff">640</span>, <span style="color:#ae81ff">704</span>, <span style="color:#ae81ff">768</span>, <span style="color:#ae81ff">896</span>, <span style="color:#ae81ff">1024</span>, <span style="color:#ae81ff">1152</span>, <span style="color:#ae81ff">1280</span>, <span style="color:#ae81ff">1408</span>, <span style="color:#ae81ff">1536</span>, <span style="color:#ae81ff">1792</span>, <span style="color:#ae81ff">2048</span>, <span style="color:#ae81ff">2304</span>, <span style="color:#ae81ff">2688</span>, <span style="color:#ae81ff">3072</span>, <span style="color:#ae81ff">3200</span>, <span style="color:#ae81ff">3456</span>, <span style="color:#ae81ff">4096</span>, <span style="color:#ae81ff">4864</span>, <span style="color:#ae81ff">5376</span>, <span style="color:#ae81ff">6144</span>, <span style="color:#ae81ff">6528</span>, <span style="color:#ae81ff">6784</span>, <span style="color:#ae81ff">6912</span>, <span style="color:#ae81ff">8192</span>, <span style="color:#ae81ff">9472</span>, <span style="color:#ae81ff">9728</span>, <span style="color:#ae81ff">10240</span>, <span style="color:#ae81ff">10880</span>, <span style="color:#ae81ff">12288</span>, <span style="color:#ae81ff">13568</span>, <span style="color:#ae81ff">14336</span>, <span style="color:#ae81ff">16384</span>, <span style="color:#ae81ff">18432</span>, <span style="color:#ae81ff">19072</span>, <span style="color:#ae81ff">20480</span>, <span style="color:#ae81ff">21760</span>, <span style="color:#ae81ff">24576</span>, <span style="color:#ae81ff">27264</span>, <span style="color:#ae81ff">28672</span>, <span style="color:#ae81ff">32768</span>}
+func divRoundUp(n, a uintptr) uintptr {
+  return (n + a - 1) / a  // (40 + 8 - 1) / 8 = 5
+}
 
-<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">size_to_class8</span> = [<span style="color:#a6e22e">smallSizeMax</span><span style="color:#f92672">/</span><span style="color:#a6e22e">smallSizeDiv</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>]<span style="color:#66d9ef">uint8</span>{<span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">3</span>, <span style="color:#ae81ff">4</span>, <span style="color:#ae81ff">5</span>, <span style="color:#ae81ff">5</span>, <span style="color:#ae81ff">6</span>, <span style="color:#ae81ff">6</span>, <span style="color:#ae81ff">7</span>, <span style="color:#ae81ff">7</span>, <span style="color:#ae81ff">8</span>, <span style="color:#ae81ff">8</span>, <span style="color:#ae81ff">9</span>, <span style="color:#ae81ff">9</span>, <span style="color:#ae81ff">10</span>, <span style="color:#ae81ff">10</span>, <span style="color:#ae81ff">11</span>, <span style="color:#ae81ff">11</span>, <span style="color:#ae81ff">12</span>, <span style="color:#ae81ff">12</span>, <span style="color:#ae81ff">13</span>, <span style="color:#ae81ff">13</span>, <span style="color:#ae81ff">14</span>, <span style="color:#ae81ff">14</span>, <span style="color:#ae81ff">15</span>, <span style="color:#ae81ff">15</span>, <span style="color:#ae81ff">16</span>, <span style="color:#ae81ff">16</span>, <span style="color:#ae81ff">17</span>, <span style="color:#ae81ff">17</span>, <span style="color:#ae81ff">18</span>, <span style="color:#ae81ff">18</span>, <span style="color:#ae81ff">19</span>, <span style="color:#ae81ff">19</span>, <span style="color:#ae81ff">19</span>, <span style="color:#ae81ff">19</span>, <span style="color:#ae81ff">20</span>, <span style="color:#ae81ff">20</span>, <span style="color:#ae81ff">20</span>, <span style="color:#ae81ff">20</span>, <span style="color:#ae81ff">21</span>, <span style="color:#ae81ff">21</span>, <span style="color:#ae81ff">21</span>, <span style="color:#ae81ff">21</span>, <span style="color:#ae81ff">22</span>, <span style="color:#ae81ff">22</span>, <span style="color:#ae81ff">22</span>, <span style="color:#ae81ff">22</span>, <span style="color:#ae81ff">23</span>, <span style="color:#ae81ff">23</span>, <span style="color:#ae81ff">23</span>, <span style="color:#ae81ff">23</span>, <span style="color:#ae81ff">24</span>, <span style="color:#ae81ff">24</span>, <span style="color:#ae81ff">24</span>, <span style="color:#ae81ff">24</span>, <span style="color:#ae81ff">25</span>, <span style="color:#ae81ff">25</span>, <span style="color:#ae81ff">25</span>, <span style="color:#ae81ff">25</span>, <span style="color:#ae81ff">26</span>, <span style="color:#ae81ff">26</span>, <span style="color:#ae81ff">26</span>, <span style="color:#ae81ff">26</span>, <span style="color:#ae81ff">27</span>, <span style="color:#ae81ff">27</span>, <span style="color:#ae81ff">27</span>, <span style="color:#ae81ff">27</span>, <span style="color:#ae81ff">27</span>, <span style="color:#ae81ff">27</span>, <span style="color:#ae81ff">27</span>, <span style="color:#ae81ff">27</span>, <span style="color:#ae81ff">28</span>, <span style="color:#ae81ff">28</span>, <span style="color:#ae81ff">28</span>, <span style="color:#ae81ff">28</span>, <span style="color:#ae81ff">28</span>, <span style="color:#ae81ff">28</span>, <span style="color:#ae81ff">28</span>, <span style="color:#ae81ff">28</span>, <span style="color:#ae81ff">29</span>, <span style="color:#ae81ff">29</span>, <span style="color:#ae81ff">29</span>, <span style="color:#ae81ff">29</span>, <span style="color:#ae81ff">29</span>, <span style="color:#ae81ff">29</span>, <span style="color:#ae81ff">29</span>, <span style="color:#ae81ff">29</span>, <span style="color:#ae81ff">30</span>, <span style="color:#ae81ff">30</span>, <span style="color:#ae81ff">30</span>, <span style="color:#ae81ff">30</span>, <span style="color:#ae81ff">30</span>, <span style="color:#ae81ff">30</span>, <span style="color:#ae81ff">30</span>, <span style="color:#ae81ff">30</span>, <span style="color:#ae81ff">31</span>, <span style="color:#ae81ff">31</span>, <span style="color:#ae81ff">31</span>, <span style="color:#ae81ff">31</span>, <span style="color:#ae81ff">31</span>, <span style="color:#ae81ff">31</span>, <span style="color:#ae81ff">31</span>, <span style="color:#ae81ff">31</span>, <span style="color:#ae81ff">31</span>, <span style="color:#ae81ff">31</span>, <span style="color:#ae81ff">31</span>, <span style="color:#ae81ff">31</span>, <span style="color:#ae81ff">31</span>, <span style="color:#ae81ff">31</span>, <span style="color:#ae81ff">31</span>, <span style="color:#ae81ff">31</span>, <span style="color:#ae81ff">32</span>, <span style="color:#ae81ff">32</span>, <span style="color:#ae81ff">32</span>, <span style="color:#ae81ff">32</span>, <span style="color:#ae81ff">32</span>, <span style="color:#ae81ff">32</span>, <span style="color:#ae81ff">32</span>, <span style="color:#ae81ff">32</span>, <span style="color:#ae81ff">32</span>, <span style="color:#ae81ff">32</span>, <span style="color:#ae81ff">32</span>, <span style="color:#ae81ff">32</span>, <span style="color:#ae81ff">32</span>, <span style="color:#ae81ff">32</span>, <span style="color:#ae81ff">32</span>, <span style="color:#ae81ff">32</span>}
+var class_to_size = [_NumSizeClasses]uint16{0, 8, 16, 24, 32, 48, 64, 80, 96, 112, 128, 144, 160, 176, 192, 208, 224, 240, 256, 288, 320, 352, 384, 416, 448, 480, 512, 576, 640, 704, 768, 896, 1024, 1152, 1280, 1408, 1536, 1792, 2048, 2304, 2688, 3072, 3200, 3456, 4096, 4864, 5376, 6144, 6528, 6784, 6912, 8192, 9472, 9728, 10240, 10880, 12288, 13568, 14336, 16384, 18432, 19072, 20480, 21760, 24576, 27264, 28672, 32768}
 
-</code></pre></div></div>
+var size_to_class8 = [smallSizeMax/smallSizeDiv + 1]uint8{0, 1, 2, 3, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12, 13, 13, 14, 14, 15, 15, 16, 16, 17, 17, 18, 18, 19, 19, 19, 19, 20, 20, 20, 20, 21, 21, 21, 21, 22, 22, 22, 22, 23, 23, 23, 23, 24, 24, 24, 24, 25, 25, 25, 25, 26, 26, 26, 26, 27, 27, 27, 27, 27, 27, 27, 27, 28, 28, 28, 28, 28, 28, 28, 28, 29, 29, 29, 29, 29, 29, 29, 29, 30, 30, 30, 30, 30, 30, 30, 30, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32}
+
+</code></pre></div>
                     <div class="post_footer">
                         
                         <div class="meta">

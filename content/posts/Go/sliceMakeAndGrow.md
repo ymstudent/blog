@@ -9,7 +9,7 @@ keywords: ["Go", "slice", "创建", 扩容]
 
 ### 内部数据结构
 
-```go
+```
 type slice struct {
   array unsafe.Pointer  // 指向底层数组的指针
   len   int            // 长度
@@ -21,7 +21,7 @@ type slice struct {
 
 * var 直接声明
 
-  ```go
+  ```
   var ints []int
   // 这种创建方式只声明了切片结构，但没有声明底层数组，所以其底层结构如下
   type slice struct {
@@ -33,7 +33,7 @@ type slice struct {
 
 * make 创建
 
-  ```go
+  ```
   ints := make([]int, 2, 5)
   // 通过make创建的slice会开辟一个底层数组，并把这个底层数组初始化为整形的默认值 0， 所以其底层结构如下
   type slice struct {
@@ -46,7 +46,7 @@ type slice struct {
 
 * new 创建
 
-  ```go
+  ```
   ints := new([]int)
   // 通过new创建的slice，底层结构与var创建的一样，但new返回的是slice结构的起始地址
   type slice struct {
@@ -76,7 +76,7 @@ type slice struct {
 
 eg:
 
-```go
+```
 package main
 
 import "fmt"
@@ -90,7 +90,7 @@ func main() {
 
 结合上面的例子来分析源码：
 
-```go
+```
 // s 一次性添加3个元素，那么所需的newCap变为5，所以这里的入参为：slice类型 int，slice结构 s，所需容量 5
 func growslice(et *_type, old slice, cap int) slice {
     // ……
