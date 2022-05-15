@@ -88,6 +88,37 @@
 
 <div class="post animated fadeInDown">
     <div class="post_title">
+        <h2><a href='/posts/go/slicemakeandgrow/'>Go slice 的创建与扩容</a></h2>
+    </div>
+    
+    <div class="list">
+        <div class="post_content markdown">
+            <p>内部数据结构 type slice struct { array unsafe.Pointer // 指向底层数组的指针 len int // 长度 cap int // 容量 } 创建 var 直接声明 var ints []int // 这种创建方式只声明了切片结构，但没有声明底层数组，所以其底层结构如下 type slice struct { array unsafe.Pointer // nil len int // 0 cap int // 0 } make 创建 ints :=......</p>
+        </div>
+    </div>
+    
+    <div class="post_footer">
+        <div class="meta">
+            <div class="info">
+                <span class="field">
+                    <i class="ri-map-pin-time-line"></i>
+                    <span class="date">2022.05.15</span>
+                </span>
+                
+                <span class="field tags">
+                    <i class="ri-stack-line"></i>
+                    
+                    <a href="https://ymfeb.cn/tags/go/">Go</a>
+                    
+                </span>
+                
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="post animated fadeInDown">
+    <div class="post_title">
         <h2><a href='/posts/redis/commandexceprocess/'>redis命令请求的执行过程</a></h2>
     </div>
     
@@ -210,37 +241,6 @@
     </div>
 </div>
 
-<div class="post animated fadeInDown">
-    <div class="post_title">
-        <h2><a href='/posts/redis/redisserver/'>redis的Server结构与过期键处理</a></h2>
-    </div>
-    
-    <div class="list">
-        <div class="post_content markdown">
-            <p>redis 服务器将所有数据库都保存在 redisServer 结构的 db 数组中，db 数组的每个项都是一个 redisDb 结构，每个 redisDb 结构代表一个数据库。 redisServer的结构 typedef struct redisServer { //***** //一个数组，保存服务器中的所有数据库 redisDb *db ; //服务器数据......</p>
-        </div>
-    </div>
-    
-    <div class="post_footer">
-        <div class="meta">
-            <div class="info">
-                <span class="field">
-                    <i class="ri-map-pin-time-line"></i>
-                    <span class="date">2020.12.31</span>
-                </span>
-                
-                <span class="field tags">
-                    <i class="ri-stack-line"></i>
-                    
-                    <a href="https://ymfeb.cn/tags/redis/">redis</a>
-                    
-                </span>
-                
-            </div>
-        </div>
-    </div>
-</div>
-
 
 <div class="pagination">
     
@@ -256,7 +256,9 @@
     </div>
     <footer class="footer">
     <div class="powered_by">
-        <span>@2020 云起 Powered by hugo Theme by zozo</span>
+        <span>@2020-2021 云起 Powered by hugo Theme by zozo</span>
+        <br/>
+        <span><a href="https://beian.miit.gov.cn/" target="_blank">京ICP备17044457号</a> </span>
     </div>
 
     <div class="footer_slogan">

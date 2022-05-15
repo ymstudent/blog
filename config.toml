@@ -35,7 +35,7 @@ theme = "zozo"
 
 [Params]
   subtitle = "道阻且长，行则将至"
-  footerSlogan = "@2020 云起 Powered by hugo Theme by zozo"
+  footerSlogan = "@2020-2021 云起 Powered by hugo Theme by zozo"
   enableMathJax = true                                                 # enable mathjax  # 是否使用mathjax（数学公式）
   enableSummary = true                                                 # display the article summary  # 是否显示文章摘要
   mainSections = ["posts","post"]

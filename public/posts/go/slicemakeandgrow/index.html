@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="zh-cn" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="author" content="VarKai" />
+	
+	
+	
+	<title>Go slice 的创建与扩容 ｜ 云起</title>
+	
+    
+    
+    <meta name="description" content="内部数据结构 type slice struct { array unsafe.Pointer // 指向底层数组的指针 len int // 长度 cap int // 容量 } 创建 var 直接声明 var ints []int // 这种创建方式只声明了切片结构，但没有声明底层数组，所以其底层结构如下 type slice struct { array unsafe.Pointer // nil len int // 0 cap int // 0 } make 创建 ints :=" />
+    
+
+    
+    
+    <meta name="keywords" content="Go, slice, 创建, 扩容" />
+    
+
+	
+    
+    <link rel="shortcut icon" href="https://ymfeb.cn/images/favicon.ico" />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="https://ymfeb.cn/css/normalize.css" />
+    <link rel="stylesheet" type="text/css" media="screen" href="https://cdn.jsdelivr.net/npm/animate.css@4.1.0/animate.min.css" />
+    <link rel="stylesheet" type="text/css" media="screen" href="https://ymfeb.cn/css/zozo.css" />
+	<link rel="stylesheet" type="text/css" media="screen" href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css" />
+    <link rel="stylesheet" type="text/css" media="screen" href="https://ymfeb.cn/css/highlight.css" />
+
+    
+    
+</head>
+
+<body>
+    <div class="main animate__animated animate__fadeInDown">
+        <div class="nav_container animated fadeInDown">
+    <div class="site_nav" id="site_nav">
+        <ul>
+            
+            <li>
+                <a href="/">Home</a>
+            </li>
+            
+            <li>
+                <a href="/posts/">Archive</a>
+            </li>
+            
+            <li>
+                <a href="/tags/">Tags</a>
+            </li>
+            
+            <li>
+                <a href="/about/">About</a>
+            </li>
+            
+        </ul>
+    </div>
+    <div class="menu_icon">
+        <a id="menu_icon"><i class="ri-menu-line"></i></a>
+    </div>
+</div>
+        <div class="header animated fadeInDown">
+    <div class="site_title_container">
+        <div class="site_title">
+            <h1>
+                <a href="https://ymfeb.cn/">
+                    <span>云起</span>
+                </a>
+            </h1>
+        </div>
+        <div class="description">
+            <p class="sub_title">道阻且长，行则将至</p>
+            <div class="my_socials">
+                
+                
+                <a href="https://github.com/ymstudent" title="github" target="_blank"><i class="ri-github-fill"></i></a>
+                
+                
+                <a href="https://ymfeb.cn/index.xml" type="application/rss+xml" title="rss" target="_blank"><i
+                        class="ri-rss-fill"></i></a>
+            </div>
+        </div>
+    </div>
+</div>
+        <div class="content">
+            <div class="post_page">
+                <div class="post animate__animated animate__fadeInDown">
+                    <div class="post_title post_detail_title">
+                        <h2><a href='/posts/go/slicemakeandgrow/'>Go slice 的创建与扩容</a></h2>
+                        <span class="date">2022.05.15</span>
+                    </div>
+                    <div class="post_content markdown"><h3 id="内部数据结构">内部数据结构</h3>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">slice</span> <span style="color:#66d9ef">struct</span> {
+  <span style="color:#a6e22e">array</span> <span style="color:#a6e22e">unsafe</span>.<span style="color:#a6e22e">Pointer</span>  <span style="color:#75715e">// 指向底层数组的指针
+</span><span style="color:#75715e"></span>  <span style="color:#a6e22e">len</span>   <span style="color:#66d9ef">int</span>            <span style="color:#75715e">// 长度
+</span><span style="color:#75715e"></span>  <span style="color:#a6e22e">cap</span>   <span style="color:#66d9ef">int</span>            <span style="color:#75715e">// 容量
+</span><span style="color:#75715e"></span>}
+</code></pre></div><h3 id="创建">创建</h3>
+<ul>
+<li>
+<p>var 直接声明</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">ints</span> []<span style="color:#66d9ef">int</span>
+<span style="color:#75715e">// 这种创建方式只声明了切片结构，但没有声明底层数组，所以其底层结构如下
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">slice</span> <span style="color:#66d9ef">struct</span> {
+  <span style="color:#a6e22e">array</span> <span style="color:#a6e22e">unsafe</span>.<span style="color:#a6e22e">Pointer</span>  <span style="color:#75715e">// nil
+</span><span style="color:#75715e"></span>  <span style="color:#a6e22e">len</span>   <span style="color:#66d9ef">int</span>            <span style="color:#75715e">// 0
+</span><span style="color:#75715e"></span>  <span style="color:#a6e22e">cap</span>   <span style="color:#66d9ef">int</span>            <span style="color:#75715e">// 0
+</span><span style="color:#75715e"></span>}
+</code></pre></div></li>
+<li>
+<p>make 创建</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#a6e22e">ints</span> <span style="color:#f92672">:=</span> make([]<span style="color:#66d9ef">int</span>, <span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">5</span>)
+<span style="color:#75715e">// 通过make创建的slice会开辟一个底层数组，并把这个底层数组初始化为整形的默认值 0， 所以其底层结构如下
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">slice</span> <span style="color:#66d9ef">struct</span> {
+  <span style="color:#a6e22e">array</span> <span style="color:#a6e22e">unsafe</span>.<span style="color:#a6e22e">Pointer</span>  <span style="color:#75715e">// 指向一个长度为5，默认值为0的数组
+</span><span style="color:#75715e"></span>  <span style="color:#a6e22e">len</span>   <span style="color:#66d9ef">int</span>            <span style="color:#75715e">// 2
+</span><span style="color:#75715e"></span>  <span style="color:#a6e22e">cap</span>   <span style="color:#66d9ef">int</span>            <span style="color:#75715e">// 5
+</span><span style="color:#75715e"></span>}
+  
+</code></pre></div></li>
+<li>
+<p>new 创建</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#a6e22e">ints</span> <span style="color:#f92672">:=</span> new([]<span style="color:#66d9ef">int</span>)
+<span style="color:#75715e">// 通过new创建的slice，底层结构与var创建的一样，但new返回的是slice结构的起始地址
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">slice</span> <span style="color:#66d9ef">struct</span> {
+  <span style="color:#a6e22e">array</span> <span style="color:#a6e22e">unsafe</span>.<span style="color:#a6e22e">Pointer</span>  <span style="color:#75715e">// nil
+</span><span style="color:#75715e"></span>  <span style="color:#a6e22e">len</span>   <span style="color:#66d9ef">int</span>            <span style="color:#75715e">// 0
+</span><span style="color:#75715e"></span>  <span style="color:#a6e22e">cap</span>   <span style="color:#66d9ef">int</span>            <span style="color:#75715e">// 0
+</span><span style="color:#75715e"></span>}
+<span style="color:#75715e">// 此时，slice还没有底层数组，像 (*ints)[0] = 1这样的操作是会报panic的
+</span><span style="color:#75715e">// 通过append的方式添加元素，它就会给slice开辟一个底层数组
+</span></code></pre></div></li>
+</ul>
+<h3 id="扩容策略">扩容策略</h3>
+<p>1、如果oldCap * 2 &lt; newCap, 那么就直接扩容到newCap</p>
+<p>2、如果大于newCap，那么就看元素个数，如果oldLen &lt; 1024, 就直接扩到 oldLen * 2</p>
+<p>3、如果oldLen &gt;= 1024, 那么就先扩个1/4， 即 oldLen * (1 + 1/4)</p>
+<p>4、扩容的数量确定了，就该分配对应大小的内存了，内存的计算方式为：newCap * 元素大小</p>
+<p>5、从系统预先创建的内存块中选取合适大小的内存块(runtime/sizeclasses.go中定义)作为实际分配的内存</p>
+<p>6、实际分配的内存 / 元素大小 = 实际扩容后的容量</p>
+<p>eg:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#f92672">package</span> <span style="color:#a6e22e">main</span>
+
+<span style="color:#f92672">import</span> <span style="color:#e6db74">&#34;fmt&#34;</span>
+
+<span style="color:#66d9ef">func</span> <span style="color:#a6e22e">main</span>() {
+	<span style="color:#a6e22e">s</span> <span style="color:#f92672">:=</span> []<span style="color:#66d9ef">int</span>{<span style="color:#ae81ff">1</span>,<span style="color:#ae81ff">2</span>}
+	<span style="color:#a6e22e">s</span> = append(<span style="color:#a6e22e">s</span>,<span style="color:#ae81ff">4</span>,<span style="color:#ae81ff">5</span>,<span style="color:#ae81ff">6</span>)
+	<span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Printf</span>(<span style="color:#e6db74">&#34;len=%d, cap=%d&#34;</span>,len(<span style="color:#a6e22e">s</span>),cap(<span style="color:#a6e22e">s</span>))
+}
+</code></pre></div><p>结合上面的例子来分析源码：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#75715e">// s 一次性添加3个元素，那么所需的newCap变为5，所以这里的入参为：slice类型 int，slice结构 s，所需容量 5
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">growslice</span>(<span style="color:#a6e22e">et</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">_type</span>, <span style="color:#a6e22e">old</span> <span style="color:#a6e22e">slice</span>, <span style="color:#a6e22e">cap</span> <span style="color:#66d9ef">int</span>) <span style="color:#a6e22e">slice</span> {
+    <span style="color:#75715e">// ……
+</span><span style="color:#75715e"></span>    <span style="color:#a6e22e">newcap</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">old</span>.<span style="color:#a6e22e">cap</span>
+	<span style="color:#a6e22e">doublecap</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">newcap</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">newcap</span>
+  <span style="color:#75715e">// 所需容量 &gt; oldCap * 2
+</span><span style="color:#75715e"></span>	<span style="color:#66d9ef">if</span> <span style="color:#a6e22e">cap</span> &gt; <span style="color:#a6e22e">doublecap</span> {
+		<span style="color:#a6e22e">newcap</span> = <span style="color:#a6e22e">cap</span> <span style="color:#75715e">//新容量直接变为5
+</span><span style="color:#75715e"></span>	} <span style="color:#66d9ef">else</span> {
+		<span style="color:#66d9ef">if</span> <span style="color:#a6e22e">old</span>.<span style="color:#a6e22e">len</span> &lt; <span style="color:#ae81ff">1024</span> {
+			<span style="color:#a6e22e">newcap</span> = <span style="color:#a6e22e">doublecap</span>
+		} <span style="color:#66d9ef">else</span> {
+			<span style="color:#66d9ef">for</span> <span style="color:#a6e22e">newcap</span> &lt; <span style="color:#a6e22e">cap</span> {
+				<span style="color:#a6e22e">newcap</span> <span style="color:#f92672">+=</span> <span style="color:#a6e22e">newcap</span> <span style="color:#f92672">/</span> <span style="color:#ae81ff">4</span>
+			}
+		}
+	}
+	<span style="color:#75715e">// ……
+</span><span style="color:#75715e"></span>	
+  <span style="color:#75715e">// 新容量 * 元素大小，int类型大小为8字节，所以这里入参为：5 * 8 = 40字节的容量
+</span><span style="color:#75715e"></span>	<span style="color:#a6e22e">capmem</span> = <span style="color:#a6e22e">roundupsize</span>(uintptr(<span style="color:#a6e22e">newcap</span>) <span style="color:#f92672">*</span> <span style="color:#a6e22e">ptrSize</span>) <span style="color:#75715e">//roundupsize后，最终返回 48
+</span><span style="color:#75715e"></span>	<span style="color:#a6e22e">newcap</span> = int(<span style="color:#a6e22e">capmem</span> <span style="color:#f92672">/</span> <span style="color:#a6e22e">ptrSize</span>) <span style="color:#75715e">// 48 / 8 = 6，所以最终的newCap为6，长度为5
+</span><span style="color:#75715e"></span>}
+
+<span style="color:#75715e">// 为什么需要roundupsize？在Go语言中申请内存并不是直接与操作系统交涉，而是与语言自身实现的内存管理模块交涉，内存管理模块会提前和操作系统申请一批内存，分成常用的规格管理起来，我们申请内存时，它会为我们匹配到足够大且最接近的规格。 像上面的例子中每个元素的大小为8字节，所以需要分配5 * 8 = 40字节大小的内存，而实际申请时会匹配到48字节，所以实际扩容后的容量为6。
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">roundupsize</span>(<span style="color:#a6e22e">size</span> <span style="color:#66d9ef">uintptr</span>) <span style="color:#66d9ef">uintptr</span> {
+	<span style="color:#66d9ef">if</span> <span style="color:#a6e22e">size</span> &lt; <span style="color:#a6e22e">_MaxSmallSize</span> {
+		<span style="color:#66d9ef">if</span> <span style="color:#a6e22e">size</span> <span style="color:#f92672">&lt;=</span> <span style="color:#a6e22e">smallSizeMax</span><span style="color:#f92672">-</span><span style="color:#ae81ff">8</span> { <span style="color:#75715e">//40 &lt; 32768 - 8
+</span><span style="color:#75715e"></span>			<span style="color:#66d9ef">return</span> uintptr(<span style="color:#a6e22e">class_to_size</span>[<span style="color:#a6e22e">size_to_class8</span>[<span style="color:#a6e22e">divRoundUp</span>(<span style="color:#a6e22e">size</span>, <span style="color:#a6e22e">smallSizeDiv</span>)]])<span style="color:#75715e">//class_to_size[size_to_class8[5]]，根据索引取出值48
+</span><span style="color:#75715e"></span>		} <span style="color:#66d9ef">else</span> {
+			<span style="color:#66d9ef">return</span> uintptr(<span style="color:#a6e22e">class_to_size</span>[<span style="color:#a6e22e">size_to_class128</span>[<span style="color:#a6e22e">divRoundUp</span>(<span style="color:#a6e22e">size</span><span style="color:#f92672">-</span><span style="color:#a6e22e">smallSizeMax</span>, <span style="color:#a6e22e">largeSizeDiv</span>)]])
+		}
+	}
+	<span style="color:#66d9ef">if</span> <span style="color:#a6e22e">size</span><span style="color:#f92672">+</span><span style="color:#a6e22e">_PageSize</span> &lt; <span style="color:#a6e22e">size</span> {
+		<span style="color:#66d9ef">return</span> <span style="color:#a6e22e">size</span>
+	}
+	<span style="color:#66d9ef">return</span> <span style="color:#a6e22e">alignUp</span>(<span style="color:#a6e22e">size</span>, <span style="color:#a6e22e">_PageSize</span>)
+}
+
+<span style="color:#66d9ef">func</span> <span style="color:#a6e22e">divRoundUp</span>(<span style="color:#a6e22e">n</span>, <span style="color:#a6e22e">a</span> <span style="color:#66d9ef">uintptr</span>) <span style="color:#66d9ef">uintptr</span> {
+  <span style="color:#66d9ef">return</span> (<span style="color:#a6e22e">n</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">a</span> <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>) <span style="color:#f92672">/</span> <span style="color:#a6e22e">a</span>  <span style="color:#75715e">// (40 + 8 - 1) / 8 = 5
+</span><span style="color:#75715e"></span>}
+
+<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">class_to_size</span> = [<span style="color:#a6e22e">_NumSizeClasses</span>]<span style="color:#66d9ef">uint16</span>{<span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">8</span>, <span style="color:#ae81ff">16</span>, <span style="color:#ae81ff">24</span>, <span style="color:#ae81ff">32</span>, <span style="color:#ae81ff">48</span>, <span style="color:#ae81ff">64</span>, <span style="color:#ae81ff">80</span>, <span style="color:#ae81ff">96</span>, <span style="color:#ae81ff">112</span>, <span style="color:#ae81ff">128</span>, <span style="color:#ae81ff">144</span>, <span style="color:#ae81ff">160</span>, <span style="color:#ae81ff">176</span>, <span style="color:#ae81ff">192</span>, <span style="color:#ae81ff">208</span>, <span style="color:#ae81ff">224</span>, <span style="color:#ae81ff">240</span>, <span style="color:#ae81ff">256</span>, <span style="color:#ae81ff">288</span>, <span style="color:#ae81ff">320</span>, <span style="color:#ae81ff">352</span>, <span style="color:#ae81ff">384</span>, <span style="color:#ae81ff">416</span>, <span style="color:#ae81ff">448</span>, <span style="color:#ae81ff">480</span>, <span style="color:#ae81ff">512</span>, <span style="color:#ae81ff">576</span>, <span style="color:#ae81ff">640</span>, <span style="color:#ae81ff">704</span>, <span style="color:#ae81ff">768</span>, <span style="color:#ae81ff">896</span>, <span style="color:#ae81ff">1024</span>, <span style="color:#ae81ff">1152</span>, <span style="color:#ae81ff">1280</span>, <span style="color:#ae81ff">1408</span>, <span style="color:#ae81ff">1536</span>, <span style="color:#ae81ff">1792</span>, <span style="color:#ae81ff">2048</span>, <span style="color:#ae81ff">2304</span>, <span style="color:#ae81ff">2688</span>, <span style="color:#ae81ff">3072</span>, <span style="color:#ae81ff">3200</span>, <span style="color:#ae81ff">3456</span>, <span style="color:#ae81ff">4096</span>, <span style="color:#ae81ff">4864</span>, <span style="color:#ae81ff">5376</span>, <span style="color:#ae81ff">6144</span>, <span style="color:#ae81ff">6528</span>, <span style="color:#ae81ff">6784</span>, <span style="color:#ae81ff">6912</span>, <span style="color:#ae81ff">8192</span>, <span style="color:#ae81ff">9472</span>, <span style="color:#ae81ff">9728</span>, <span style="color:#ae81ff">10240</span>, <span style="color:#ae81ff">10880</span>, <span style="color:#ae81ff">12288</span>, <span style="color:#ae81ff">13568</span>, <span style="color:#ae81ff">14336</span>, <span style="color:#ae81ff">16384</span>, <span style="color:#ae81ff">18432</span>, <span style="color:#ae81ff">19072</span>, <span style="color:#ae81ff">20480</span>, <span style="color:#ae81ff">21760</span>, <span style="color:#ae81ff">24576</span>, <span style="color:#ae81ff">27264</span>, <span style="color:#ae81ff">28672</span>, <span style="color:#ae81ff">32768</span>}
+
+<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">size_to_class8</span> = [<span style="color:#a6e22e">smallSizeMax</span><span style="color:#f92672">/</span><span style="color:#a6e22e">smallSizeDiv</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>]<span style="color:#66d9ef">uint8</span>{<span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">3</span>, <span style="color:#ae81ff">4</span>, <span style="color:#ae81ff">5</span>, <span style="color:#ae81ff">5</span>, <span style="color:#ae81ff">6</span>, <span style="color:#ae81ff">6</span>, <span style="color:#ae81ff">7</span>, <span style="color:#ae81ff">7</span>, <span style="color:#ae81ff">8</span>, <span style="color:#ae81ff">8</span>, <span style="color:#ae81ff">9</span>, <span style="color:#ae81ff">9</span>, <span style="color:#ae81ff">10</span>, <span style="color:#ae81ff">10</span>, <span style="color:#ae81ff">11</span>, <span style="color:#ae81ff">11</span>, <span style="color:#ae81ff">12</span>, <span style="color:#ae81ff">12</span>, <span style="color:#ae81ff">13</span>, <span style="color:#ae81ff">13</span>, <span style="color:#ae81ff">14</span>, <span style="color:#ae81ff">14</span>, <span style="color:#ae81ff">15</span>, <span style="color:#ae81ff">15</span>, <span style="color:#ae81ff">16</span>, <span style="color:#ae81ff">16</span>, <span style="color:#ae81ff">17</span>, <span style="color:#ae81ff">17</span>, <span style="color:#ae81ff">18</span>, <span style="color:#ae81ff">18</span>, <span style="color:#ae81ff">19</span>, <span style="color:#ae81ff">19</span>, <span style="color:#ae81ff">19</span>, <span style="color:#ae81ff">19</span>, <span style="color:#ae81ff">20</span>, <span style="color:#ae81ff">20</span>, <span style="color:#ae81ff">20</span>, <span style="color:#ae81ff">20</span>, <span style="color:#ae81ff">21</span>, <span style="color:#ae81ff">21</span>, <span style="color:#ae81ff">21</span>, <span style="color:#ae81ff">21</span>, <span style="color:#ae81ff">22</span>, <span style="color:#ae81ff">22</span>, <span style="color:#ae81ff">22</span>, <span style="color:#ae81ff">22</span>, <span style="color:#ae81ff">23</span>, <span style="color:#ae81ff">23</span>, <span style="color:#ae81ff">23</span>, <span style="color:#ae81ff">23</span>, <span style="color:#ae81ff">24</span>, <span style="color:#ae81ff">24</span>, <span style="color:#ae81ff">24</span>, <span style="color:#ae81ff">24</span>, <span style="color:#ae81ff">25</span>, <span style="color:#ae81ff">25</span>, <span style="color:#ae81ff">25</span>, <span style="color:#ae81ff">25</span>, <span style="color:#ae81ff">26</span>, <span style="color:#ae81ff">26</span>, <span style="color:#ae81ff">26</span>, <span style="color:#ae81ff">26</span>, <span style="color:#ae81ff">27</span>, <span style="color:#ae81ff">27</span>, <span style="color:#ae81ff">27</span>, <span style="color:#ae81ff">27</span>, <span style="color:#ae81ff">27</span>, <span style="color:#ae81ff">27</span>, <span style="color:#ae81ff">27</span>, <span style="color:#ae81ff">27</span>, <span style="color:#ae81ff">28</span>, <span style="color:#ae81ff">28</span>, <span style="color:#ae81ff">28</span>, <span style="color:#ae81ff">28</span>, <span style="color:#ae81ff">28</span>, <span style="color:#ae81ff">28</span>, <span style="color:#ae81ff">28</span>, <span style="color:#ae81ff">28</span>, <span style="color:#ae81ff">29</span>, <span style="color:#ae81ff">29</span>, <span style="color:#ae81ff">29</span>, <span style="color:#ae81ff">29</span>, <span style="color:#ae81ff">29</span>, <span style="color:#ae81ff">29</span>, <span style="color:#ae81ff">29</span>, <span style="color:#ae81ff">29</span>, <span style="color:#ae81ff">30</span>, <span style="color:#ae81ff">30</span>, <span style="color:#ae81ff">30</span>, <span style="color:#ae81ff">30</span>, <span style="color:#ae81ff">30</span>, <span style="color:#ae81ff">30</span>, <span style="color:#ae81ff">30</span>, <span style="color:#ae81ff">30</span>, <span style="color:#ae81ff">31</span>, <span style="color:#ae81ff">31</span>, <span style="color:#ae81ff">31</span>, <span style="color:#ae81ff">31</span>, <span style="color:#ae81ff">31</span>, <span style="color:#ae81ff">31</span>, <span style="color:#ae81ff">31</span>, <span style="color:#ae81ff">31</span>, <span style="color:#ae81ff">31</span>, <span style="color:#ae81ff">31</span>, <span style="color:#ae81ff">31</span>, <span style="color:#ae81ff">31</span>, <span style="color:#ae81ff">31</span>, <span style="color:#ae81ff">31</span>, <span style="color:#ae81ff">31</span>, <span style="color:#ae81ff">31</span>, <span style="color:#ae81ff">32</span>, <span style="color:#ae81ff">32</span>, <span style="color:#ae81ff">32</span>, <span style="color:#ae81ff">32</span>, <span style="color:#ae81ff">32</span>, <span style="color:#ae81ff">32</span>, <span style="color:#ae81ff">32</span>, <span style="color:#ae81ff">32</span>, <span style="color:#ae81ff">32</span>, <span style="color:#ae81ff">32</span>, <span style="color:#ae81ff">32</span>, <span style="color:#ae81ff">32</span>, <span style="color:#ae81ff">32</span>, <span style="color:#ae81ff">32</span>, <span style="color:#ae81ff">32</span>, <span style="color:#ae81ff">32</span>}
+
+</code></pre></div></div>
+                    <div class="post_footer">
+                        
+                        <div class="meta">
+                            <div class="info">
+                                <span class="field tags">
+                                    <i class="ri-stack-line"></i>
+                                    
+                                    <a href="https://ymfeb.cn/tags/go/">Go</a>
+                                    
+                                </span>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+                
+                
+                <div class="doc_comments"></div>
+                
+            </div>
+        </div>
+    </div>
+    <a id="back_to_top" href="#" class="back_to_top"><i class="ri-arrow-up-s-line"></i></a>
+    <footer class="footer">
+    <div class="powered_by">
+        <span>@2020-2021 云起 Powered by hugo Theme by zozo</span>
+        <br/>
+        <span><a href="https://beian.miit.gov.cn/" target="_blank">京ICP备17044457号</a> </span>
+    </div>
+
+    <div class="footer_slogan">
+    </div>
+</footer>
+    <script src="https://ymfeb.cn/js/jquery-3.5.1.min.js"></script>
+<link href="https://ymfeb.cn/css/fancybox.min.css" rel="stylesheet">
+<script src="https://ymfeb.cn/js/fancybox.min.js"></script>
+<script src="https://ymfeb.cn/js/zozo.js"></script>
+
+
+<script type="text/javascript" async
+    src="https://cdn.bootcss.com/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        MathJax.Hub.Config({
+            tex2jax: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\[\[', '\]\]']],
+                processEscapes: true,
+                processEnvironments: true,
+                skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+                TeX: {
+                    equationNumbers: { autoNumber: "AMS" },
+                    extensions: ["AMSmath.js", "AMSsymbols.js"]
+                }
+            }
+        });
+
+        MathJax.Hub.Queue(function () {
+            
+            
+            
+            var all = MathJax.Hub.getAllJax(), i;
+            for (i = 0; i < all.length; i += 1) {
+                all[i].SourceElement().parentNode.className += ' has-jax';
+            }
+        });
+    </script>
+
+<style>
+    code.has-jax {
+        font: inherit;
+        font-size: 100%;
+        background: inherit;
+        border: inherit;
+        color: #515151;
+    }
+</style>
+
+
+
+</body>
+
+</html>
